@@ -1,2 +1,3 @@
-# change_detection.pytorch
-Deep learning models for change detection of remote sensing images
+Python library with Neural Networks for Change Detection based on PyTorch.
+
+coming soon ...
