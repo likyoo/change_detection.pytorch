@@ -32,12 +32,12 @@ valid_dataset = LEVIR_CD_Dataset('../LEVIR-CD/test',
 train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=0)
 valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, num_workers=0)
 
-loss = smp.utils.losses.CrossEntropyLoss()
+loss = cdp.utils.losses.CrossEntropyLoss()
 metrics = [
-    smp.utils.metrics.IoU(),
-    smp.utils.metrics.Fscore(),
-    smp.utils.metrics.Precision(),
-    smp.utils.metrics.Recall(),
+    cdp.utils.metrics.IoU(),
+    cdp.utils.metrics.Fscore(),
+    cdp.utils.metrics.Precision(),
+    cdp.utils.metrics.Recall(),
 ]
 
 optimizer = torch.optim.Adam([
@@ -46,7 +46,7 @@ optimizer = torch.optim.Adam([
 
 # create epoch runners
 # it is a simple loop of iterating over dataloader`s samples
-train_epoch = smp.utils.train.TrainEpoch(
+train_epoch = cdp.utils.train.TrainEpoch(
     model,
     loss=loss,
     metrics=metrics,
@@ -55,7 +55,7 @@ train_epoch = smp.utils.train.TrainEpoch(
     verbose=True,
 )
 
-valid_epoch = smp.utils.train.ValidEpoch(
+valid_epoch = cdp.utils.train.ValidEpoch(
     model,
     loss=loss,
     metrics=metrics,
