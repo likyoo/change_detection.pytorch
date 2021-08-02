@@ -130,15 +130,15 @@ class UnetDecoder(nn.Module):
     def aggregation_layer(self, fea1, fea2, fusion_from="concat", ignore_original_img=True):
         """aggregate features from siamese or non-siamese branches"""
         aggregate_fea = []
-        # start_idx = 1 if ignore_original_img else 0
-        for idx in range(0, len(fea1)):
+        start_idx = 1 if ignore_original_img else 0
+        for idx in range(start_idx, len(fea1)):
             aggregate_fea.append(self.fusion(fea1[idx], fea2[idx], fusion_from))
 
         return aggregate_fea
 
     def forward(self, *features):
         features = self.aggregation_layer(features[0], features[1], self.fusion_form)
-        features = features[1:]    # remove first skip with same spatial resolution
+        # features = features[1:]    # remove first skip with same spatial resolution
         features = features[::-1]  # reverse channels to start from head of encoder
 
         head = features[0]
