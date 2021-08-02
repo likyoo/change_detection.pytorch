@@ -300,12 +300,12 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 </div>
 </details>
 
-### 🔭 Dataset <a name="dataset"></a>
+### :truck: Dataset <a name="dataset"></a>
 - [x] [LEVIR-CD]((https://justchenhao.github.io/LEVIR/))
 
 - [ ] ...
 
-### 🔭 Reference <a name="reference"></a>
+### :books: Reference <a name="reference"></a>
 [qubvel/segmentation_models.pytorch](https://github.com/qubvel/segmentation_models.pytorch)
 
 [open-mmlab/mmsegmentation](https://github.com/open-mmlab/mmsegmentation)
