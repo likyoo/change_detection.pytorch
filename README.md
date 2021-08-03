@@ -306,6 +306,9 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 - [ ] ...
 
 ### :books: Reference <a name="reference"></a>
-[qubvel/segmentation_models.pytorch](https://github.com/qubvel/segmentation_models.pytorch)
+- [qubvel/segmentation_models.pytorch](https://github.com/qubvel/segmentation_models.pytorch)
 
-[open-mmlab/mmsegmentation](https://github.com/open-mmlab/mmsegmentation)
+- [albumentations-team/albumentations](https://github.com/albumentations-team/albumentations)
+
+- [open-mmlab/mmsegmentation](https://github.com/open-mmlab/mmsegmentation)
+
