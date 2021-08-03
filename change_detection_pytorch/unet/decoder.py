@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ..base import modules as md
+from ..base import Decoder
 
 
 class DecoderBlock(nn.Module):
@@ -64,7 +65,7 @@ class CenterBlock(nn.Sequential):
         super().__init__(conv1, conv2)
 
 
-class UnetDecoder(nn.Module):
+class UnetDecoder(Decoder):
     def __init__(
             self,
             encoder_channels,
@@ -113,28 +114,6 @@ class UnetDecoder(nn.Module):
             for in_ch, skip_ch, out_ch in zip(in_channels, skip_channels, out_channels)
         ]
         self.blocks = nn.ModuleList(blocks)
-
-    def fusion(self, x1, x2, fusion_form="concat"):
-        """Specify the form of feature fusion"""
-        if fusion_form == "concat":
-            x = torch.cat([x1, x2], dim=1)
-        elif fusion_form == "sum":
-            x = x1 + x2
-        elif fusion_form == "diff":
-            x = torch.abs(x1 - x2)
-        else:
-            raise ValueError('the fusion form "{}" is not defined'.format(fusion_form))
-
-        return x
-
-    def aggregation_layer(self, fea1, fea2, fusion_from="concat", ignore_original_img=True):
-        """aggregate features from siamese or non-siamese branches"""
-        aggregate_fea = []
-        start_idx = 1 if ignore_original_img else 0
-        for idx in range(start_idx, len(fea1)):
-            aggregate_fea.append(self.fusion(fea1[idx], fea2[idx], fusion_from))
-
-        return aggregate_fea
 
     def forward(self, *features):
         features = self.aggregation_layer(features[0], features[1], self.fusion_form)
