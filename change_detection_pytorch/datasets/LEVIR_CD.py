@@ -49,9 +49,6 @@ class LEVIR_CD_Dataset(CustomDataset):
         base_axis = 1 if self.test_mode else 0
         to_tensor_axis_bias = 2 if self.debug else 0
 
-        if self.test_mode:
-            self.transform = self.get_test_transform()
-
         if not self.ann_dir:
             img_info = self.prepare_img(idx)
             img = np.concatenate((img_info['img']['img1'], img_info['img']['img2']), axis=2)

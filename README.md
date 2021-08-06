@@ -301,7 +301,9 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 </details>
 
 ### :truck: Dataset <a name="dataset"></a>
-- [x] [LEVIR-CD]((https://justchenhao.github.io/LEVIR/))
+- [x] [LEVIR-CD](https://justchenhao.github.io/LEVIR/)
+
+- [x] [SVCD](https://www.researchgate.net/publication/325470033_CHANGE_DETECTION_IN_REMOTE_SENSING_IMAGES_USING_CONDITIONAL_ADVERSARIAL_NETWORKS) [[google drive](https://drive.google.com/file/d/1GX656JqqOyBi_Ef0w65kDGVto-nHrNs9/edit) | [baidu disk](https://pan.baidu.com/s/1bU9bSRxQnlfw7OkOw7hqjA) (x8gi)] 
 
 - [ ] ...
 
@@ -311,4 +313,8 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 - [albumentations-team/albumentations](https://github.com/albumentations-team/albumentations)
 
 - [open-mmlab/mmsegmentation](https://github.com/open-mmlab/mmsegmentation)
+
+- [wenhwu/awesome-remote-sensing-change-detection](https://github.com/wenhwu/awesome-remote-sensing-change-detection)
+
+
 

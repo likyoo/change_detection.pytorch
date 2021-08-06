@@ -8,6 +8,7 @@ import albumentations as A
 import cv2
 import numpy as np
 from albumentations.pytorch import ToTensorV2
+from change_detection_pytorch.datasets.transforms.albu import ToTensorTest
 from torch.utils.data import Dataset
 
 
@@ -81,10 +82,13 @@ class CustomDataset(Dataset):
         # transform/augment data
         if transform is None:
             self.transform = self.get_default_transform()
+        if self.test_mode:
+            self.transform = self.get_test_transform()
 
         # debug, visualize augmentations
         if self.debug:
-            self.transform = A.Compose([t for t in self.transform if not isinstance(t, (A.Normalize, ToTensorV2))])
+            self.transform = A.Compose([t for t in self.transform if not isinstance(t, (A.Normalize, ToTensorV2,
+                                                                                        ToTensorTest))])
 
         # load annotations
         self.img_infos = self.load_infos(self.img_dir, self.img_suffix,
@@ -154,6 +158,10 @@ class CustomDataset(Dataset):
             ToTensorV2()
         ])
         return default_transform
+
+    def get_test_transform(self):
+        """Set the test transformation."""
+        pass
 
     def prepare_img_ann(self, idx):
         """Get image and annotations after pipeline.
