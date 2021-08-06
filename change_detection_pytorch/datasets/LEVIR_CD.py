@@ -1,21 +1,22 @@
-from change_detection_pytorch.datasets.custom import CustomDataset
 import os.path as osp
+
+import albumentations as A
 import numpy as np
+from albumentations.pytorch import ToTensorV2
+from change_detection_pytorch.datasets.custom import CustomDataset
 
 
 class LEVIR_CD_Dataset(CustomDataset):
     """LEVIR-CD dataset"""
 
-    def __init__(self, img_dir, sub_dir_1='A', sub_dir_2='B', img_suffix='.png', ann_dir=None, seg_map_suffix='.png',
+    def __init__(self, img_dir, sub_dir_1='A', sub_dir_2='B', ann_dir=None, img_suffix='.png', seg_map_suffix='.png',
                  transform=None, split=None, data_root=None, test_mode=False, size=256, debug=False):
-        super().__init__(img_dir, sub_dir_1, sub_dir_2, img_suffix, ann_dir, seg_map_suffix, transform, split,
+        super().__init__(img_dir, sub_dir_1, sub_dir_2, ann_dir, img_suffix, seg_map_suffix, transform, split,
                          data_root, test_mode, size, debug)
 
     def get_default_transform(self):
         """Set the default transformation."""
 
-        import albumentations as A
-        from albumentations.pytorch import ToTensorV2
         default_transform = A.Compose([
             A.RandomCrop(256, 256),
             # A.ShiftScaleRotate(),
@@ -27,8 +28,8 @@ class LEVIR_CD_Dataset(CustomDataset):
     def get_test_transform(self):
         """Set the test transformation."""
 
-        import albumentations as A
-        from change_detection_pytorch.datasets.transforms.albu import ChunkImage, ToTensorTest
+        from change_detection_pytorch.datasets.transforms.albu import (
+            ChunkImage, ToTensorTest)
         test_transform = A.Compose([
             A.Normalize(mean=(0, 0, 0, 0, 0, 0), std=(1, 1, 1, 1, 1, 1)),  # div(255)
             ChunkImage(self.size),
@@ -45,23 +46,24 @@ class LEVIR_CD_Dataset(CustomDataset):
                 False).
         """
 
+        base_axis = 1 if self.test_mode else 0
         to_tensor_axis_bias = 2 if self.debug else 0
 
         if self.test_mode:
-            img_info = self.prepare_train_img(idx)
+            self.transform = self.get_test_transform()
+
+        if not self.ann_dir:
+            img_info = self.prepare_img(idx)
             img = np.concatenate((img_info['img']['img1'], img_info['img']['img2']), axis=2)
-
-            test_transform = self.get_test_transform()
-            transformed_data = test_transform(image=img, mask=img_info['ann']['ann'])
-            transformed_image, img_info['ann']['ann'] = transformed_data['image'], transformed_data['mask']
-            img_info['img']['img1'], img_info['img']['img2'] = np.split(transformed_image, 2, axis=1+to_tensor_axis_bias)
-
+            transformed_image = self.transform(image=img)['image']
         else:
-            img_info = self.prepare_train_img(idx)
+            img_info = self.prepare_img_ann(idx)
             img = np.concatenate((img_info['img']['img1'], img_info['img']['img2']), axis=2)
             transformed_data = self.transform(image=img, mask=img_info['ann']['ann'])
             transformed_image, img_info['ann']['ann'] = transformed_data['image'], transformed_data['mask']
-            img_info['img']['img1'], img_info['img']['img2'] = np.split(transformed_image, 2, axis=0+to_tensor_axis_bias)
+
+        img_info['img']['img1'], img_info['img']['img2'] = np.split(transformed_image, 2,
+                                                                    axis=base_axis+to_tensor_axis_bias)
 
         return img_info
 

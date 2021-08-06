@@ -27,11 +27,8 @@ __all__ = ["ToTensorTest", "ChunkImage"]
 
 
 class ToTensorTest(BasicTransform):
-    """Convert image and mask to `torch.Tensor`. The numpy `HWC` image is converted to pytorch `CHW` tensor.
-    If the image is in `HW` format (grayscale image), it will be converted to pytorch `HW` tensor.
-    This is a simplified and improved version of the old `ToTensor`
-    transform (`ToTensor` was deprecated, and now it is not present in Albumentations. You should use `ToTensorV2`
-    instead).
+    """Convert image and mask to `torch.Tensor`. The numpy `BHWC` image is converted to pytorch `BCHW` tensor.
+    If the image is in `BHW` format (grayscale image), it will be converted to pytorch `BHW` tensor.
     Args:
         transpose_mask (bool): if True and an input mask has three dimensions, this transform will transpose dimensions
         so the shape `[height, width, num_channels]` becomes `[num_channels, height, width]`. The latter format is a

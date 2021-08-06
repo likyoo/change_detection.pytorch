@@ -1,12 +1,14 @@
+import glob
 import os
 import os.path as osp
 from collections import OrderedDict
 from functools import reduce
-import numpy as np
-from torch.utils.data import Dataset
-import glob
+
 import albumentations as A
+import cv2
+import numpy as np
 from albumentations.pytorch import ToTensorV2
+from torch.utils.data import Dataset
 
 
 class CustomDataset(Dataset):
@@ -28,17 +30,17 @@ class CustomDataset(Dataset):
     A valid imgs/gt filename pair should be like ``xxx{img_suffix}`` and
     ``xxx{seg_map_suffix}`` (extension is also included in the suffix).
     Args:
-        pipeline (list[dict]): Processing pipeline
-        img_dir (str): Path to image directory
+        img_dir (str): Path to image directory.
+        sub_dir_1 (str): Path to the directory of the first temporal images.
+            e.g. 'A' in LEVIR-CD dataset (LEVIR-CD/train/A). Default: 'A'
+        sub_dir_2 (str): Path to the directory of the second temporal images.
+            e.g. 'B' in LEVIR-CD dataset (LEVIR-CD/train/B). Default: 'B'
+        ann_dir (str): Path to ground truth directory.
         img_suffix (str): Suffix of images. Default: '.jpg'
         seg_map_suffix (str): Suffix of segmentation maps. Default: '.png'
         data_root (str, optional): Data root for img_dir/ann_dir. Default:
             None.
         test_mode (bool): Whether to the test mode.
-        sub_dir_1 (str): Path to the directory of the first temporal images.
-            e.g. 'A' in LEVIR-CD dataset (LEVIR-CD/train/A). Default: 'A'
-        sub_dir_2 (str): Path to the directory of the second temporal images.
-            e.g. 'B' in LEVIR-CD dataset (LEVIR-CD/train/B). Default: 'B'
         size (int): The size of input images.
         debug (bool): Whether to use debug mode. i.e. visualization.
     """
@@ -47,8 +49,8 @@ class CustomDataset(Dataset):
                  img_dir,
                  sub_dir_1='A',
                  sub_dir_2='B',
-                 img_suffix='.jpg',
                  ann_dir=None,
+                 img_suffix='.jpg',
                  seg_map_suffix='.png',
                  transform=None,
                  split=None,
@@ -58,8 +60,8 @@ class CustomDataset(Dataset):
                  debug=False):
         self.transform = transform
         self.img_dir = img_dir
-        self.img_suffix = img_suffix
         self.ann_dir = ann_dir
+        self.img_suffix = img_suffix
         self.seg_map_suffix = seg_map_suffix
         self.split = split
         self.data_root = data_root
@@ -114,9 +116,9 @@ class CustomDataset(Dataset):
                     img_info['img'] = dict(img1_path=osp.join(img_dir, sub_dir_1, img_name),
                                            img2_path=osp.join(img_dir, sub_dir_2, img_name))
                     if ann_dir is not None:
-                        seg_map = osp.join(ann_dir,
+                        seg_map_path = osp.join(ann_dir,
                                            img_name.replace(img_suffix, seg_map_suffix))
-                        img_info['ann'] = dict(ann_path=seg_map)
+                        img_info['ann'] = dict(ann_path=seg_map_path)
                     img_infos.append(img_info)
         else:
             for img in glob.glob(osp.join(img_dir, sub_dir_1, '*'+img_suffix)):
@@ -125,9 +127,9 @@ class CustomDataset(Dataset):
                 img_info['img'] = dict(img1_path=osp.join(img_dir, sub_dir_1, img_name),
                                        img2_path=osp.join(img_dir, sub_dir_2, img_name))
                 if ann_dir is not None:
-                    seg_map = osp.join(ann_dir,
-                                       img_name.replace(img_suffix, seg_map_suffix))
-                    img_info['ann'] = dict(ann_path=seg_map)
+                    seg_map_path = osp.join(ann_dir,
+                                            img_name.replace(img_suffix, seg_map_suffix))
+                    img_info['ann'] = dict(ann_path=seg_map_path)
                 img_infos.append(img_info)
 
         print(f'Loaded {len(img_infos)} images')
@@ -153,12 +155,12 @@ class CustomDataset(Dataset):
         ])
         return default_transform
 
-    def prepare_train_img(self, idx):
-        """Get training data and annotations after pipeline.
+    def prepare_img_ann(self, idx):
+        """Get image and annotations after pipeline.
         Args:
             idx (int): Index of data.
         Returns:
-            dict: Training data and annotation after pipeline with new keys
+            dict: Image and annotation after pipeline with new keys
                 introduced by pipeline.
         """
 
@@ -167,12 +169,12 @@ class CustomDataset(Dataset):
         self.get_gt_seg_maps(img_info, self.debug)
         return img_info
 
-    def prepare_test_img(self, idx):
-        """Get testing data after pipeline.
+    def prepare_img(self, idx):
+        """Get image after pipeline.
         Args:
             idx (int): Index of data.
         Returns:
-            dict: Testing data after pipeline with new keys introduced by
+            dict: Image after pipeline with new keys introduced by
                 pipeline.
         """
 
@@ -188,7 +190,6 @@ class CustomDataset(Dataset):
             dict: image info with new keys.
         """
 
-        import cv2
         img_info['img']['img1'] = cv2.cvtColor(cv2.imread(img_info['img']['img1_path']),
                                                cv2.COLOR_BGR2RGB)
         img_info['img']['img2'] = cv2.cvtColor(cv2.imread(img_info['img']['img2_path']),
@@ -204,16 +205,13 @@ class CustomDataset(Dataset):
             dict: ann info with new keys.
         """
 
-        import cv2
         ann = cv2.imread(img_info['ann']['ann_path'], cv2.IMREAD_GRAYSCALE)
-        if not vis:
-            ann = ann / 255
+        ann = ann / 255 if not vis else ann
         img_info['ann']['ann'] = ann
         return img_info
 
     def format_results(self, results, **kwargs):
         """Place holder to format result to datasets specific output."""
-
         pass
 
     def __getitem__(self, idx):
@@ -221,25 +219,9 @@ class CustomDataset(Dataset):
         Args:
             idx (int): Index of data.
         Returns:
-            dict: Training/test data (with annotation if `test_mode` is set
-                False).
+            dict: Training/test data (with annotation if ann_dir is not None).
         """
-
-        to_tensor_axis_bias = 2 if self.debug else 0
-
-        if self.test_mode:
-            img_info = self.prepare_test_img(idx)
-            img = np.concatenate((img_info['img']['img1'], img_info['img']['img2']), axis=2)
-            transformed_image = self.transform(image=img)['image']
-
-        else:
-            img_info = self.prepare_train_img(idx)
-            img = np.concatenate((img_info['img']['img1'], img_info['img']['img2']), axis=2)
-            transformed_data = self.transform(image=img, mask=img_info['ann']['ann'])
-            transformed_image, img_info['ann']['ann'] = transformed_data['image'], transformed_data['mask']
-
-        img_info['img']['img1'], img_info['img']['img2'] = np.split(transformed_image, 2, axis=0+to_tensor_axis_bias)
-        return img_info
+        pass
 
     def __len__(self):
         """Total number of samples of data."""

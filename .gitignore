@@ -1,2 +1,4 @@
 # Default ignored files
 .idea/
+changelog.md
+test_tt.py
