@@ -81,9 +81,10 @@ class CustomDataset(Dataset):
 
         # transform/augment data
         if transform is None:
-            self.transform = self.get_default_transform()
-        if self.test_mode:
-            self.transform = self.get_test_transform()
+            self.transform = self.get_default_transform() if not self.test_mode \
+                else self.get_test_transform()
+        else:
+            self.transform = transform
 
         # debug, visualize augmentations
         if self.debug:
