@@ -228,7 +228,7 @@ class CustomDataset(Dataset):
         Returns:
             dict: Training/test data (with annotation if ann_dir is not None).
         """
-        pass
+        raise NotImplementedError
 
     def __len__(self):
         """Total number of samples of data."""
