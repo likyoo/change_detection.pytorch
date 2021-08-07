@@ -1,5 +1,5 @@
 import change_detection_pytorch as cdp
-from change_detection_pytorch.datasets import LEVIR_CD_Dataset
+from change_detection_pytorch.datasets import LEVIR_CD_Dataset, SVCD_Dataset
 from torch.utils.data import Dataset, DataLoader
 import torch
 
