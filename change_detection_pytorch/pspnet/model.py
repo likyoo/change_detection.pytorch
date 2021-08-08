@@ -1,10 +1,8 @@
 from typing import Optional, Union
 
-from .decoder import PSPDecoder
+from ..base import ClassificationHead, SegmentationHead, SegmentationModel
 from ..encoders import get_encoder
-
-from ..base import SegmentationModel
-from ..base import SegmentationHead, ClassificationHead
+from .decoder import PSPDecoder
 
 
 class PSPNet(SegmentationModel):

@@ -2,8 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ..base import modules
-from ..base import Decoder
+from ..base import Decoder, modules
 
 
 class PSPBlock(nn.Module):
