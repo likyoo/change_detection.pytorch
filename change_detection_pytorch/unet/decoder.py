@@ -116,7 +116,8 @@ class UnetDecoder(Decoder):
         self.blocks = nn.ModuleList(blocks)
 
     def forward(self, *features):
-        features = self.aggregation_layer(features[0], features[1], self.fusion_form)
+        features = self.aggregation_layer(features[0], features[1],
+                                          self.fusion_form, ignore_original_img=True)
         # features = features[1:]    # remove first skip with same spatial resolution
         features = features[::-1]  # reverse channels to start from head of encoder
 
