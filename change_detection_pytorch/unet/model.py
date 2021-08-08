@@ -38,6 +38,9 @@ class Unet(SegmentationModel):
                 - pooling (str): One of "max", "avg". Default is "avg"
                 - dropout (float): Dropout factor in [0, 1)
                 - activation (str): An activation function to apply "sigmoid"/"softmax" (could be **None** to return logits)
+        siam_encoder: Whether using siamese branch. Default is True
+        fusion_form: The form of fusing features from two branches. Available options are **"concat"**, **"sum"**, and **"diff"**.
+            Default is **concat**
 
     Returns:
         ``torch.nn.Module``: Unet
