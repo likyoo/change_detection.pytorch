@@ -35,7 +35,7 @@ Please refer to local_test.py temporarily.
 
 - [ ] FPN [[paper](http://presentations.cocodataset.org/COCO17-Stuff-FAIR.pdf)]
 
-- [ ] PSPNet [[paper](https://arxiv.org/abs/1612.01105)]
+- [x] PSPNet [[paper](https://arxiv.org/abs/1612.01105)]
 
 - [ ] PAN [[paper](https://arxiv.org/abs/1805.10180)]
 

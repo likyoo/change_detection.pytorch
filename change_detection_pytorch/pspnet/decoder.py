@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ..base import modules
+from ..base import Decoder
 
 
 class PSPBlock(nn.Module):
@@ -37,7 +38,7 @@ class PSPModule(nn.Module):
         return x
 
 
-class PSPDecoder(nn.Module):
+class PSPDecoder(Decoder):
 
     def __init__(
             self,
@@ -45,8 +46,14 @@ class PSPDecoder(nn.Module):
             use_batchnorm=True,
             out_channels=512,
             dropout=0.2,
+            fusion_form="concat",
     ):
         super().__init__()
+
+        # adjust encoder channels according to fusion form
+        self.fusion_form = fusion_form
+        if self.fusion_form == "concat":
+            encoder_channels = [ch*2 for ch in encoder_channels]
 
         self.psp = PSPModule(
             in_channels=encoder_channels[-1],
@@ -64,7 +71,10 @@ class PSPDecoder(nn.Module):
         self.dropout = nn.Dropout2d(p=dropout)
 
     def forward(self, *features):
-        x = features[-1]
+        # features = self.aggregation_layer(features[0], features[1],
+        #                                   self.fusion_form, ignore_original_img=True)
+        # x = features[-1]
+        x = self.fusion(features[0][-1], features[1][-1], self.fusion_form)
         x = self.psp(x)
         x = self.conv(x)
         x = self.dropout(x)
