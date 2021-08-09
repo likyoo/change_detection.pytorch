@@ -1,6 +1,4 @@
 import torch
-import torch.nn.functional as F
-from .metrics_ import mean_iou, mean_fscore
 
 
 def _take_channels(*xs, ignore_channels=None):
@@ -30,17 +28,12 @@ def iou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
         float: IoU (Jaccard) score
     """
 
-    num_classes = pr.shape[1]
     pr = _threshold(pr, threshold=threshold)
+    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
-    score = mean_iou(pr, gt, num_classes, ignore_channels, eps=eps)['IoU']
-    return score[-1]
-
-    # pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
-    # intersection = torch.sum(gt * pr)
-    # union = torch.sum(gt) + torch.sum(pr) - intersection + eps
-    #
-    # return (intersection + eps) / union
+    intersection = torch.sum(gt * pr)
+    union = torch.sum(gt) + torch.sum(pr) - intersection + eps
+    return (intersection + eps) / union
 
 
 jaccard = iou
@@ -51,28 +44,24 @@ def f_score(pr, gt, beta=1, eps=1e-7, threshold=None, ignore_channels=None):
     Args:
         pr (torch.Tensor): predicted tensor
         gt (torch.Tensor):  ground truth tensor
-        beta (int): positive constant
+        beta (float): positive constant
         eps (float): epsilon to avoid zero division
         threshold: threshold for outputs binarization
     Returns:
         float: F score
     """
 
-    num_classes = pr.shape[1]
     pr = _threshold(pr, threshold=threshold)
+    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
-    score = mean_fscore(pr, gt, num_classes, ignore_channels, beta=beta, eps=eps)['Fscore']
-    return score[-1]
-    # pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
-    #
-    # tp = torch.sum(gt * pr)
-    # fp = torch.sum(pr) - tp
-    # fn = torch.sum(gt) - tp
-    #
-    # score = ((1 + beta ** 2) * tp + eps) \
-    #         / ((1 + beta ** 2) * tp + beta ** 2 * fn + fp + eps)
-    #
-    # return score
+    tp = torch.sum(gt * pr)
+    fp = torch.sum(pr) - tp
+    fn = torch.sum(gt) - tp
+
+    score = ((1 + beta ** 2) * tp + eps) \
+            / ((1 + beta ** 2) * tp + beta ** 2 * fn + fp + eps)
+
+    return score
 
 
 def accuracy(pr, gt, threshold=0.5, ignore_channels=None):
@@ -85,17 +74,12 @@ def accuracy(pr, gt, threshold=0.5, ignore_channels=None):
     Returns:
         float: precision score
     """
-
-    num_classes = pr.shape[1]
     pr = _threshold(pr, threshold=threshold)
+    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
-    score = mean_iou(pr, gt, num_classes, ignore_channels)['Acc']
-    return score[-1]
-    # pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
-    #
-    # tp = torch.sum(gt == pr, dtype=pr.dtype)
-    # score = tp / gt.view(-1).shape[0]
-    # return score
+    tp = torch.sum(gt == pr, dtype=pr.dtype)
+    score = tp / gt.view(-1).shape[0]
+    return score
 
 
 def precision(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
@@ -109,19 +93,15 @@ def precision(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
         float: precision score
     """
 
-    num_classes = pr.shape[1]
     pr = _threshold(pr, threshold=threshold)
+    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
-    score = mean_fscore(pr, gt, num_classes, ignore_channels, eps=eps)['Precision']
-    return score[-1]
-    # pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
-    #
-    # tp = torch.sum(gt * pr)
-    # fp = torch.sum(pr) - tp
-    #
-    # score = (tp + eps) / (tp + fp + eps)
-    #
-    # return score
+    tp = torch.sum(gt * pr)
+    fp = torch.sum(pr) - tp
+
+    score = (tp + eps) / (tp + fp + eps)
+
+    return score
 
 
 def recall(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
@@ -135,16 +115,54 @@ def recall(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
         float: recall score
     """
 
-    num_classes = pr.shape[1]
     pr = _threshold(pr, threshold=threshold)
+    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
-    score = mean_fscore(pr, gt, num_classes, ignore_channels, eps=eps)['Recall']
-    return score[-1]
-    # pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
-    #
-    # tp = torch.sum(gt * pr)
-    # fn = torch.sum(gt) - tp
-    #
-    # score = (tp + eps) / (tp + fn + eps)
-    #
-    # return score
+    tp = torch.sum(gt * pr)
+    fn = torch.sum(gt) - tp
+
+    score = (tp + eps) / (tp + fn + eps)
+
+    return score
+
+def binary_miou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
+    """Calculate binary_miou score between ground truth and prediction
+    Args:
+        pr (torch.Tensor): predicted tensor
+        gt (torch.Tensor):  ground truth tensor
+        eps (float): epsilon to avoid zero division
+        threshold: threshold for outputs binarization
+    Returns:
+        float: precision score
+    """
+
+    from sklearn.metrics import confusion_matrix
+
+    pr = _threshold(pr, threshold=threshold)
+    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
+
+    tn, fp, fn, tp = confusion_matrix(gt.data.cpu().numpy().flatten(),
+                                      pr.data.cpu().numpy().flatten()).ravel()
+
+    return ((tp + eps) / (tp + fp + fn + eps) + (tn + eps) / (tn + fp + fn + eps)) / 2
+
+def overall_accuracy(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
+    """Calculate overall accuracy score between ground truth and prediction
+    Args:
+        pr (torch.Tensor): predicted tensor
+        gt (torch.Tensor):  ground truth tensor
+        eps (float): epsilon to avoid zero division
+        threshold: threshold for outputs binarization
+    Returns:
+        float: precision score
+    """
+
+    from sklearn.metrics import confusion_matrix
+
+    pr = _threshold(pr, threshold=threshold)
+    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
+
+    tn, fp, fn, tp = confusion_matrix(gt.data.cpu().numpy().flatten(),
+                                      pr.data.cpu().numpy().flatten()).ravel()
+
+    return (tp + tn + eps) / (tp + tn + fp + fn + eps)
