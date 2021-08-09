@@ -144,7 +144,9 @@ def binary_miou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
     tn, fp, fn, tp = confusion_matrix(gt.data.cpu().numpy().flatten(),
                                       pr.data.cpu().numpy().flatten()).ravel()
 
-    return ((tp + eps) / (tp + fp + fn + eps) + (tn + eps) / (tn + fp + fn + eps)) / 2
+    score = ((tp + eps) / (tp + fp + fn + eps) + (tn + eps) / (tn + fp + fn + eps)) / 2
+
+    return score
 
 def overall_accuracy(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
     """Calculate overall accuracy score between ground truth and prediction
@@ -165,4 +167,6 @@ def overall_accuracy(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
     tn, fp, fn, tp = confusion_matrix(gt.data.cpu().numpy().flatten(),
                                       pr.data.cpu().numpy().flatten()).ravel()
 
-    return (tp + tn + eps) / (tp + tn + fp + fn + eps)
+    score = (tp + tn + eps) / (tp + tn + fp + fn + eps)
+
+    return score
