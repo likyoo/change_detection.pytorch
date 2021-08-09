@@ -34,10 +34,10 @@ valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, num_worker
 
 loss = cdp.utils.losses.CrossEntropyLoss()
 metrics = [
-    cdp.utils.metrics.IoU(),
-    cdp.utils.metrics.Fscore(),
-    cdp.utils.metrics.Precision(),
-    cdp.utils.metrics.Recall(),
+    cdp.utils.metrics.IoU(activation='argmax2d'),
+    cdp.utils.metrics.Fscore(activation='argmax2d'),
+    cdp.utils.metrics.Precision(activation='argmax2d'),
+    cdp.utils.metrics.Recall(activation='argmax2d'),
 ]
 
 optimizer = torch.optim.Adam([
