@@ -145,6 +145,7 @@ def binary_miou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
                                       pr.data.cpu().numpy().flatten()).ravel()
 
     score = ((tp + eps) / (tp + fp + fn + eps) + (tn + eps) / (tn + fp + fn + eps)) / 2
+    score = torch.tensor(score)
 
     return score
 
@@ -168,5 +169,6 @@ def overall_accuracy(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
                                       pr.data.cpu().numpy().flatten()).ravel()
 
     score = (tp + tn + eps) / (tp + tn + fp + fn + eps)
+    score = torch.tensor(score)
 
     return score
