@@ -77,8 +77,10 @@ def accuracy(pr, gt, threshold=0.5, ignore_channels=None):
     pr = _threshold(pr, threshold=threshold)
     pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
-    tp = torch.sum(gt == pr, dtype=pr.dtype)
-    score = tp / gt.view(-1).shape[0]
+    tp_tn = torch.sum(gt == pr, dtype=pr.dtype)
+
+    score = tp_tn / gt.view(-1).shape[0]
+
     return score
 
 
@@ -136,39 +138,14 @@ def binary_miou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
         float: precision score
     """
 
-    from sklearn.metrics import confusion_matrix
-
     pr = _threshold(pr, threshold=threshold)
     pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
-    tn, fp, fn, tp = confusion_matrix(gt.data.cpu().numpy().flatten(),
-                                      pr.data.cpu().numpy().flatten()).ravel()
+    tp = torch.sum(gt * pr)
+    fp = torch.sum(pr) - tp
+    fn = torch.sum(gt) - tp
+    tn = torch.sum(gt == pr, dtype=pr.dtype) - tp
 
     score = ((tp + eps) / (tp + fp + fn + eps) + (tn + eps) / (tn + fp + fn + eps)) / 2
-    score = torch.tensor(score)
-
-    return score
-
-def overall_accuracy(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
-    """Calculate overall accuracy score between ground truth and prediction
-    Args:
-        pr (torch.Tensor): predicted tensor
-        gt (torch.Tensor):  ground truth tensor
-        eps (float): epsilon to avoid zero division
-        threshold: threshold for outputs binarization
-    Returns:
-        float: precision score
-    """
-
-    from sklearn.metrics import confusion_matrix
-
-    pr = _threshold(pr, threshold=threshold)
-    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
-
-    tn, fp, fn, tp = confusion_matrix(gt.data.cpu().numpy().flatten(),
-                                      pr.data.cpu().numpy().flatten()).ravel()
-
-    score = (tp + tn + eps) / (tp + tn + fp + fn + eps)
-    score = torch.tensor(score)
 
     return score
