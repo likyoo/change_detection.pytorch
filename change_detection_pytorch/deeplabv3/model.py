@@ -1,9 +1,10 @@
+from typing import Optional
+
 import torch.nn as nn
 
-from typing import Optional
-from .decoder import DeepLabV3Decoder, DeepLabV3PlusDecoder
-from ..base import SegmentationModel, SegmentationHead, ClassificationHead
+from ..base import ClassificationHead, SegmentationHead, SegmentationModel
 from ..encoders import get_encoder
+from .decoder import DeepLabV3Decoder, DeepLabV3PlusDecoder
 
 
 class DeepLabV3(SegmentationModel):
@@ -31,6 +32,10 @@ class DeepLabV3(SegmentationModel):
                 - pooling (str): One of "max", "avg". Default is "avg"
                 - dropout (float): Dropout factor in [0, 1)
                 - activation (str): An activation function to apply "sigmoid"/"softmax" (could be **None** to return logits)
+        siam_encoder: Whether using siamese branch. Default is True
+        fusion_form: The form of fusing features from two branches. Available options are **"concat"**, **"sum"**, and **"diff"**.
+            Default is **concat**
+
     Returns:
         ``torch.nn.Module``: **DeepLabV3**
 
@@ -50,8 +55,12 @@ class DeepLabV3(SegmentationModel):
             activation: Optional[str] = None,
             upsampling: int = 8,
             aux_params: Optional[dict] = None,
+            siam_encoder: bool = True,
+            fusion_form: str = "concat",
     ):
         super().__init__()
+
+        self.siam_encoder = siam_encoder
 
         self.encoder = get_encoder(
             encoder_name,
@@ -61,9 +70,19 @@ class DeepLabV3(SegmentationModel):
             output_stride=8,
         )
 
+        if not self.siam_encoder:
+            self.encoder_non_siam = get_encoder(
+                encoder_name,
+                in_channels=in_channels,
+                depth=encoder_depth,
+                weights=encoder_weights,
+                output_stride=8,
+            )
+
         self.decoder = DeepLabV3Decoder(
             in_channels=self.encoder.out_channels[-1],
             out_channels=decoder_channels,
+            fusion_form=fusion_form,
         )
 
         self.segmentation_head = SegmentationHead(
@@ -110,6 +129,10 @@ class DeepLabV3Plus(SegmentationModel):
                 - pooling (str): One of "max", "avg". Default is "avg"
                 - dropout (float): Dropout factor in [0, 1)
                 - activation (str): An activation function to apply "sigmoid"/"softmax" (could be **None** to return logits)
+        siam_encoder: Whether using siamese branch. Default is True
+        fusion_form: The form of fusing features from two branches. Available options are **"concat"**, **"sum"**, and **"diff"**.
+            Default is **concat**
+
     Returns:
         ``torch.nn.Module``: **DeepLabV3Plus**
     
@@ -117,6 +140,7 @@ class DeepLabV3Plus(SegmentationModel):
         https://arxiv.org/abs/1802.02611v3
 
     """
+
     def __init__(
             self,
             encoder_name: str = "resnet34",
@@ -130,6 +154,8 @@ class DeepLabV3Plus(SegmentationModel):
             activation: Optional[str] = None,
             upsampling: int = 4,
             aux_params: Optional[dict] = None,
+            siam_encoder: bool = True,
+            fusion_form: str = "concat",
     ):
         super().__init__()
 
@@ -137,6 +163,8 @@ class DeepLabV3Plus(SegmentationModel):
             raise ValueError(
                 "Encoder output stride should be 8 or 16, got {}".format(encoder_output_stride)
             )
+
+        self.siam_encoder = siam_encoder
 
         self.encoder = get_encoder(
             encoder_name,
@@ -146,11 +174,21 @@ class DeepLabV3Plus(SegmentationModel):
             output_stride=encoder_output_stride,
         )
 
+        if not self.siam_encoder:
+            self.encoder = get_encoder(
+                encoder_name,
+                in_channels=in_channels,
+                depth=encoder_depth,
+                weights=encoder_weights,
+                output_stride=encoder_output_stride,
+            )
+
         self.decoder = DeepLabV3PlusDecoder(
             encoder_channels=self.encoder.out_channels,
             out_channels=decoder_channels,
             atrous_rates=decoder_atrous_rates,
             output_stride=encoder_output_stride,
+            fusion_form=fusion_form,
         )
 
         self.segmentation_head = SegmentationHead(

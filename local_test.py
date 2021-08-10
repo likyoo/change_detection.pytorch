@@ -45,11 +45,7 @@ optimizer = torch.optim.Adam([
     dict(params=model.parameters(), lr=0.0001),
 ])
 
-scheduler_steplr = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 50], gamma=0.1)
-scheduler_warmup = GradualWarmupScheduler(optimizer, multiplier=1, total_epoch=5, after_scheduler=scheduler_steplr)
-# this zero gradient update is needed to avoid a warning message.
-optimizer.zero_grad()
-optimizer.step()
+scheduler_steplr = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50, ], gamma=0.1)
 
 # create epoch runners
 # it is a simple loop of iterating over dataloader`s samples
@@ -78,10 +74,9 @@ MAX_EPOCH = 60
 for i in range(1, MAX_EPOCH + 1):
 
     print('\nEpoch: {}'.format(i))
-
-    scheduler_warmup.step()
     train_logs = train_epoch.run(train_loader)
     valid_logs = valid_epoch.run(valid_loader)
+    scheduler_steplr.step()
 
     # do something (save model, change lr, etc.)
     if max_score < valid_logs['fscore']:

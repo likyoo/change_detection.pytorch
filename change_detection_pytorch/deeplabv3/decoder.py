@@ -34,11 +34,17 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from ..base import Decoder
+
 __all__ = ["DeepLabV3Decoder"]
 
 
-class DeepLabV3Decoder(nn.Sequential):
-    def __init__(self, in_channels, out_channels=256, atrous_rates=(12, 24, 36)):
+class DeepLabV3Decoder(nn.Sequential, Decoder):
+    def __init__(self, in_channels, out_channels=256, atrous_rates=(12, 24, 36), fusion_form="concat"):
+        # adjust encoder channels according to fusion form
+        if fusion_form == "concat":
+            in_channels = in_channels * 2
+
         super().__init__(
             ASPP(in_channels, out_channels, atrous_rates),
             nn.Conv2d(out_channels, out_channels, 3, padding=1, bias=False),
@@ -46,18 +52,21 @@ class DeepLabV3Decoder(nn.Sequential):
             nn.ReLU(),
         )
         self.out_channels = out_channels
+        self.fusion_form = fusion_form
 
     def forward(self, *features):
-        return super().forward(features[-1])
+        x = self.fusion(features[0][-1], features[1][-1], self.fusion_form)
+        return super().forward(x)
 
 
-class DeepLabV3PlusDecoder(nn.Module):
+class DeepLabV3PlusDecoder(Decoder):
     def __init__(
         self,
         encoder_channels,
         out_channels=256,
         atrous_rates=(12, 24, 36),
         output_stride=16,
+        fusion_form="concat",
     ):
         super().__init__()
         if output_stride not in {8, 16}:
@@ -65,6 +74,11 @@ class DeepLabV3PlusDecoder(nn.Module):
 
         self.out_channels = out_channels
         self.output_stride = output_stride
+
+        # adjust encoder channels according to fusion form
+        self.fusion_form = fusion_form
+        if self.fusion_form == "concat":
+            encoder_channels = [ch*2 for ch in encoder_channels]
 
         self.aspp = nn.Sequential(
             ASPP(encoder_channels[-1], out_channels, atrous_rates, separable=True),
@@ -96,6 +110,8 @@ class DeepLabV3PlusDecoder(nn.Module):
         )
 
     def forward(self, *features):
+        features = self.aggregation_layer(features[0], features[1],
+                                          self.fusion_form, ignore_original_img=True)
         aspp_features = self.aspp(features[-1])
         aspp_features = self.up(aspp_features)
         high_res_features = self.block1(features[-4])
