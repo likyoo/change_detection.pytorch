@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ..base import modules as md
+from ..base import Decoder
 
 
 class DecoderBlock(nn.Module):
@@ -62,7 +63,7 @@ class CenterBlock(nn.Sequential):
         super().__init__(conv1, conv2)
 
 
-class UnetPlusPlusDecoder(nn.Module):
+class UnetPlusPlusDecoder(Decoder):
     def __init__(
             self,
             encoder_channels,
@@ -71,6 +72,7 @@ class UnetPlusPlusDecoder(nn.Module):
             use_batchnorm=True,
             attention_type=None,
             center=False,
+            fusion_form="concat",
     ):
         super().__init__()
 
@@ -88,6 +90,13 @@ class UnetPlusPlusDecoder(nn.Module):
         self.in_channels = [head_channels] + list(decoder_channels[:-1])
         self.skip_channels = list(encoder_channels[1:]) + [0]
         self.out_channels = decoder_channels
+
+        # adjust encoder channels according to fusion form
+        self.fusion_form = fusion_form
+        if self.fusion_form == "concat":
+            self.skip_channels = [ch*2 for ch in self.skip_channels]
+            self.in_channels[0] = self.in_channels[0] * 2
+
         if center:
             self.center = CenterBlock(
                 head_channels, head_channels, use_batchnorm=use_batchnorm
@@ -117,7 +126,9 @@ class UnetPlusPlusDecoder(nn.Module):
 
     def forward(self, *features):
 
-        features = features[1:]    # remove first skip with same spatial resolution
+        features = self.aggregation_layer(features[0], features[1],
+                                          self.fusion_form, ignore_original_img=True)
+        # features = features[1:]    # remove first skip with same spatial resolution
         features = features[::-1]  # reverse channels to start from head of encoder
         # start building dense connections
         dense_x = {}

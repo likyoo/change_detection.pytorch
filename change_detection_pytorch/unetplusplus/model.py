@@ -38,6 +38,9 @@ class UnetPlusPlus(SegmentationModel):
                 - pooling (str): One of "max", "avg". Default is "avg"
                 - dropout (float): Dropout factor in [0, 1)
                 - activation (str): An activation function to apply "sigmoid"/"softmax" (could be **None** to return logits)
+        siam_encoder: Whether using siamese branch. Default is True
+        fusion_form: The form of fusing features from two branches. Available options are **"concat"**, **"sum"**, and **"diff"**.
+            Default is **concat**
 
     Returns:
         ``torch.nn.Module``: **Unet++**
@@ -59,8 +62,12 @@ class UnetPlusPlus(SegmentationModel):
         classes: int = 1,
         activation: Optional[Union[str, callable]] = None,
         aux_params: Optional[dict] = None,
+        siam_encoder: bool = True,
+        fusion_form: str = "concat",
     ):
         super().__init__()
+
+        self.siam_encoder = siam_encoder
 
         self.encoder = get_encoder(
             encoder_name,
@@ -69,6 +76,14 @@ class UnetPlusPlus(SegmentationModel):
             weights=encoder_weights,
         )
 
+        if not self.siam_encoder:
+            self.encoder_non_siam = get_encoder(
+                encoder_name,
+                in_channels=in_channels,
+                depth=encoder_depth,
+                weights=encoder_weights,
+            )
+
         self.decoder = UnetPlusPlusDecoder(
             encoder_channels=self.encoder.out_channels,
             decoder_channels=decoder_channels,
@@ -76,6 +91,7 @@ class UnetPlusPlus(SegmentationModel):
             use_batchnorm=decoder_use_batchnorm,
             center=True if encoder_name.startswith("vgg") else False,
             attention_type=decoder_attention_type,
+            fusion_form=fusion_form,
         )
 
         self.segmentation_head = SegmentationHead(
