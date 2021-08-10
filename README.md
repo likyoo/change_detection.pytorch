@@ -27,7 +27,7 @@ Please refer to local_test.py temporarily.
 #### Architectures <a name="architectures"></a>
 - [x] Unet [[paper](https://arxiv.org/abs/1505.04597)]
 
-- [ ] Unet++ [[paper](https://arxiv.org/pdf/1807.10165.pdf)]
+- [x] Unet++ [[paper](https://arxiv.org/pdf/1807.10165.pdf)]
 
 - [ ] MAnet [[paper](https://ieeexplore.ieee.org/abstract/document/9201310)]
 
