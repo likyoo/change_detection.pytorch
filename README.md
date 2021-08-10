@@ -39,9 +39,9 @@ Please refer to local_test.py temporarily.
 
 - [ ] PAN [[paper](https://arxiv.org/abs/1805.10180)]
 
-- [ ] DeepLabV3 [[paper](https://arxiv.org/abs/1706.05587)]
+- [x] DeepLabV3 [[paper](https://arxiv.org/abs/1706.05587)]
 
-- [ ] DeepLabV3+ [[paper](https://arxiv.org/abs/1802.02611)]
+- [x] DeepLabV3+ [[paper](https://arxiv.org/abs/1802.02611)]
 
 #### Encoders <a name="encoders"></a>
 
