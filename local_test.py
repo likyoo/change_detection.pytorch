@@ -1,7 +1,9 @@
+import torch
+from torch.utils.data import DataLoader, Dataset
+
 import change_detection_pytorch as cdp
 from change_detection_pytorch.datasets import LEVIR_CD_Dataset, SVCD_Dataset
-from torch.utils.data import Dataset, DataLoader
-import torch
+from change_detection_pytorch.utils.lr_scheduler import GradualWarmupScheduler
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -34,7 +36,6 @@ valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, num_worker
 
 loss = cdp.utils.losses.CrossEntropyLoss()
 metrics = [
-    cdp.utils.metrics.IoU(activation='argmax2d'),
     cdp.utils.metrics.Fscore(activation='argmax2d'),
     cdp.utils.metrics.Precision(activation='argmax2d'),
     cdp.utils.metrics.Recall(activation='argmax2d'),
@@ -43,6 +44,12 @@ metrics = [
 optimizer = torch.optim.Adam([
     dict(params=model.parameters(), lr=0.0001),
 ])
+
+scheduler_steplr = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 50], gamma=0.1)
+scheduler_warmup = GradualWarmupScheduler(optimizer, multiplier=1, total_epoch=5, after_scheduler=scheduler_steplr)
+# this zero gradient update is needed to avoid a warning message.
+optimizer.zero_grad()
+optimizer.step()
 
 # create epoch runners
 # it is a simple loop of iterating over dataloader`s samples
@@ -63,26 +70,25 @@ valid_epoch = cdp.utils.train.ValidEpoch(
     verbose=True,
 )
 
-# train model for 40 epochs
+# train model for 60 epochs
 
 max_score = 0
+MAX_EPOCH = 60
 
-for i in range(0, 40):
+for i in range(1, MAX_EPOCH + 1):
 
     print('\nEpoch: {}'.format(i))
+
+    scheduler_warmup.step()
     train_logs = train_epoch.run(train_loader)
     valid_logs = valid_epoch.run(valid_loader)
 
     # do something (save model, change lr, etc.)
-    if max_score < valid_logs['iou_score']:
-        max_score = valid_logs['iou_score']
+    if max_score < valid_logs['fscore']:
+        max_score = valid_logs['fscore']
         print('max_score', max_score)
         torch.save(model, './best_model.pth')
         print('Model saved!')
-
-    if i == 25:
-        optimizer.param_groups[0]['lr'] = 1e-5
-        print('Decrease decoder learning rate to 1e-5!')
 
 # save results (change maps)
 valid_epoch.infer_vis(valid_loader, slide=True, image_size=1024, window_size=256,
