@@ -18,9 +18,8 @@ class Decoder(torch.nn.Module):
 
     def aggregation_layer(self, fea1, fea2, fusion_from="concat", ignore_original_img=True):
         """aggregate features from siamese or non-siamese branches"""
-        aggregate_fea = []
+
         start_idx = 1 if ignore_original_img else 0
-        for idx in range(start_idx, len(fea1)):
-            aggregate_fea.append(self.fusion(fea1[idx], fea2[idx], fusion_from))
+        aggregate_fea = [self.fusion(fea1[idx], fea2[idx], fusion_from) for idx in range(start_idx, len(fea1))]
 
         return aggregate_fea
