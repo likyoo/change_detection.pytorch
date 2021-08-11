@@ -1,27 +1,26 @@
 import functools
+
 import torch.utils.model_zoo as model_zoo
 
-from .resnet import resnet_encoders
-from .dpn import dpn_encoders
-from .vgg import vgg_encoders
-from .senet import senet_encoders
+from ._preprocessing import preprocess_input
 from .densenet import densenet_encoders
+from .dpn import dpn_encoders
+from .efficientnet import efficient_net_encoders
 from .inceptionresnetv2 import inceptionresnetv2_encoders
 from .inceptionv4 import inceptionv4_encoders
-from .efficientnet import efficient_net_encoders
 from .mobilenet import mobilenet_encoders
-from .xception import xception_encoders
+from .resnet import resnet_encoders
+from .senet import senet_encoders
 from .timm_efficientnet import timm_efficientnet_encoders
-from .timm_resnest import timm_resnest_encoders
-from .timm_res2net import timm_res2net_encoders
-from .timm_regnet import timm_regnet_encoders
-from .timm_sknet import timm_sknet_encoders
-from .timm_mobilenetv3 import timm_mobilenetv3_encoders
 from .timm_gernet import timm_gernet_encoders
-
+from .timm_mobilenetv3 import timm_mobilenetv3_encoders
+from .timm_regnet import timm_regnet_encoders
+from .timm_res2net import timm_res2net_encoders
+from .timm_resnest import timm_resnest_encoders
+from .timm_sknet import timm_sknet_encoders
 from .timm_universal import TimmUniversalEncoder
-
-from ._preprocessing import preprocess_input
+from .vgg import vgg_encoders
+from .xception import xception_encoders
 
 encoders = {}
 encoders.update(resnet_encoders)
