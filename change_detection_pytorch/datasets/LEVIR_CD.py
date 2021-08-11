@@ -18,7 +18,7 @@ class LEVIR_CD_Dataset(CustomDataset):
         """Set the default transformation."""
 
         default_transform = A.Compose([
-            A.RandomCrop(256, 256),
+            A.RandomCrop(self.size, self.size),
             # A.ShiftScaleRotate(),
             A.Normalize(mean=(0, 0, 0, 0, 0, 0), std=(1, 1, 1, 1, 1, 1)),  # div(255)
             ToTensorV2()

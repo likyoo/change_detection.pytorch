@@ -19,7 +19,7 @@ class SVCD_Dataset(CustomDataset):
 
         default_transform = A.Compose([
             A.Resize(self.size, self.size),
-            A.HorizontalFlip(p=0.5),
+            # A.HorizontalFlip(p=0.5),
             # A.RandomRotate90(p=0.5),
             A.Normalize(mean=(0, 0, 0, 0, 0, 0), std=(1, 1, 1, 1, 1, 1)),     # div(255)
             ToTensorV2()
