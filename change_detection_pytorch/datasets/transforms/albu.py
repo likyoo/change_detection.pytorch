@@ -6,24 +6,19 @@ The pipeline of Albumentations augmentation
 from __future__ import absolute_import
 
 import warnings
+from abc import ABC
+from types import LambdaType
 
 import numpy as np
 import torch
+from albumentations.core.transforms_interface import (BasicTransform,
+                                                      DualTransform,
+                                                      ImageOnlyTransform, NoOp,
+                                                      to_tuple)
+from albumentations.core.utils import format_args
 from torchvision.transforms import functional as F
 
-from types import LambdaType
-
-from albumentations.core.utils import format_args
-from albumentations.core.transforms_interface import (
-    BasicTransform,
-    DualTransform,
-    ImageOnlyTransform,
-    NoOp,
-    to_tuple,
-)
-
-
-__all__ = ["ToTensorTest", "ChunkImage"]
+__all__ = ["ToTensorTest", "ChunkImage", "ExchangeTime"]
 
 
 class ToTensorTest(BasicTransform):
@@ -63,20 +58,22 @@ class ToTensorTest(BasicTransform):
     def get_params_dependent_on_targets(self, params):
         return {}
 
+
 class ChunkImage(DualTransform):
-    """Flip the input horizontally around the y-axis.
+    """Slice the image into uniform chunks.
     Args:
-        p (float): probability of applying the transform. Default: 0.5.
+        p (float): probability of applying the transform. Default: 1.0
     Targets:
-        image, mask, bboxes, keypoints
+        image, mask
     Image types:
         uint8, float32
     """
+
     def __init__(
-        self,
-        size=256,
-        always_apply=True,
-        p=1,
+            self,
+            size=256,
+            always_apply=True,
+            p=1,
     ):
         super(ChunkImage, self).__init__(always_apply, p)
         self.size = size
@@ -87,12 +84,13 @@ class ChunkImage(DualTransform):
         if data.ndim == 3:
             c = data.shape[-1]
             data = np.lib.stride_tricks.as_strided(data, (patch_num, patch_num, size, size, c),
-                    tuple(np.array([size*h*c, size*c, h*c, c, 1])*data.itemsize))
+                                                   tuple(
+                                                       np.array([size * h * c, size * c, h * c, c, 1]) * data.itemsize))
             # data (4, 4, 256, 256, 3)
             data = np.reshape(data, (-1, size, size, c))
         elif data.ndim == 2:
             data = np.lib.stride_tricks.as_strided(data, (patch_num, patch_num, size, size),
-                    tuple(np.array([size*h, size, h, 1])*data.itemsize))
+                                                   tuple(np.array([size * h, size, h, 1]) * data.itemsize))
             # data (4, 4, 256, 256)
             data = np.reshape(data, (-1, size, size))
         else:
@@ -110,3 +108,28 @@ class ChunkImage(DualTransform):
         return (
             "size",
         )
+
+
+class ExchangeTime(ImageOnlyTransform):
+    """Exchange images of different times.
+    Args:
+        p (float): probability of applying the transform. Default: 0.5.
+    Targets:
+        image
+    Image types:
+        uint8, float32
+    """
+
+    def __init__(
+            self,
+            always_apply=False,
+            p=0.5,
+    ):
+        super(ExchangeTime, self).__init__(always_apply, p)
+
+    def apply(self, img, **params):
+        if not (img.shape[-1] & 1) == 0:
+            raise ValueError("ExchangeTime: Unequal number of channels")
+        idx1 = img.shape[-1] // 2
+        idx2 = img.shape[-1] + 1
+        return np.dstack((img[:, :, idx1:idx2], img[:, :, 0:idx1]))
