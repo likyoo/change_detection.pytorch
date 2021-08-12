@@ -31,6 +31,7 @@ class TverskyLoss(DiceLoss):
         loss: torch.Tensor
 
     """
+    __name__ = "TverskyLoss"
 
     def __init__(
         self,

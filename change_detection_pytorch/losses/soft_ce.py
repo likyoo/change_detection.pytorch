@@ -8,6 +8,7 @@ __all__ = ["SoftCrossEntropyLoss"]
 
 
 class SoftCrossEntropyLoss(nn.Module):
+    __name__ = "SoftCrossEntropyLoss"
 
     __constants__ = ["reduction", "ignore_index", "smooth_factor"]
 

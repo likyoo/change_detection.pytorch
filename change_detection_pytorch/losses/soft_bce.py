@@ -8,6 +8,7 @@ __all__ = ["SoftBCEWithLogitsLoss"]
 
 
 class SoftBCEWithLogitsLoss(nn.Module):
+    __name__ = "SoftBCEWithLogitsLoss"
 
     __constants__ = ["weight", "pos_weight", "reduction", "ignore_index", "smooth_factor"]
 

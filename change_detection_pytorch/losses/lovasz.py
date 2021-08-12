@@ -186,6 +186,8 @@ def mean(values, ignore_nan=False, empty=0):
 
 
 class LovaszLoss(_Loss):
+    __name__ = "LovaszLoss"
+
     def __init__(
         self,
         mode: str,

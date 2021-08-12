@@ -10,6 +10,7 @@ __all__ = ["JaccardLoss"]
 
 
 class JaccardLoss(_Loss):
+    __name__ = "JaccardLoss"
 
     def __init__(
         self,

@@ -10,6 +10,7 @@ __all__ = ["FocalLoss"]
 
 
 class FocalLoss(_Loss):
+    __name__ = "FocalLoss"
 
     def __init__(
         self,

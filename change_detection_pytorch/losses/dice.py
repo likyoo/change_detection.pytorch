@@ -10,6 +10,7 @@ __all__ = ["DiceLoss"]
 
 
 class DiceLoss(_Loss):
+    __name__ = "DiceLoss"
 
     def __init__(
         self,
