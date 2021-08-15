@@ -5,7 +5,6 @@ from . import functional as F
 from ..base.modules import Activation
 
 # See change_detection_pytorch/losses
-
 # class JaccardLoss(base.Loss):
 #
 #     def __init__(self, eps=1., activation=None, ignore_channels=None, **kwargs):
