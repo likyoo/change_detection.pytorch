@@ -63,6 +63,51 @@ class SCSEModule(nn.Module):
         return x * self.cSE(x) + x * self.sSE(x)
 
 
+class CBAMChannel(nn.Module):
+    def __init__(self, in_channels, reduction=16):
+        super(CBAMChannel, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.max_pool = nn.AdaptiveMaxPool2d(1)
+
+        self.fc = nn.Sequential(nn.Conv2d(in_channels, in_channels // reduction, 1, bias=False),
+                                nn.ReLU(),
+                                nn.Conv2d(in_channels // reduction, in_channels, 1, bias=False))
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        avg_out = self.fc(self.avg_pool(x))
+        max_out = self.fc(self.max_pool(x))
+        out = avg_out + max_out
+        return x * self.sigmoid(out)
+
+
+class CBAMSpatial(nn.Module):
+    def __init__(self, in_channels, kernel_size=7):
+        super(CBAMSpatial, self).__init__()
+
+        self.conv1 = nn.Conv2d(2, 1, kernel_size, padding=kernel_size//2, bias=False)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        avg_out = torch.mean(x, dim=1, keepdim=True)
+        max_out, _ = torch.max(x, dim=1, keepdim=True)
+        out = torch.cat([avg_out, max_out], dim=1)
+        out = self.conv1(out)
+        return x * self.sigmoid(out)
+
+
+class CBAM(nn.Module):
+    def __init__(self, in_channels, reduction=16, kernel_size=7):
+        super(CBAM, self).__init__()
+        self.ChannelGate = CBAMChannel(in_channels, reduction)
+        self.SpatialGate = CBAMSpatial(kernel_size)
+
+    def forward(self, x):
+        x = self.ChannelGate(x)
+        x = self.SpatialGate(x)
+        return x
+
+
 class ArgMax(nn.Module):
 
     def __init__(self, dim=None):
@@ -113,6 +158,12 @@ class Attention(nn.Module):
             self.attention = nn.Identity(**params)
         elif name == 'scse':
             self.attention = SCSEModule(**params)
+        elif name == 'cbam_channel':
+            self.attention = CBAMChannel(**params)
+        elif name == 'cbam_spatial':
+            self.attention = CBAMSpatial(**params)
+        elif name == 'cbam':
+            self.attention = CBAM(**params)
         else:
             raise ValueError("Attention {} is not implemented".format(name))
 
