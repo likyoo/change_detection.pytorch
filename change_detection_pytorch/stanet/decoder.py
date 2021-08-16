@@ -73,7 +73,7 @@ class CDSA(nn.Module):
         super(CDSA, self).__init__()
         self.in_C = in_c
         self.ds = ds
-        print('ds: ', self.ds)
+        # print('ds: ', self.ds)
         self.mode = mode
         if self.mode == 'BAM':
             self.Self_Att = BAM(self.in_C, ds=self.ds)
