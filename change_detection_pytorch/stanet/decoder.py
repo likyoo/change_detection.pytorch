@@ -28,9 +28,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAG
 import torch
 import torch.nn.functional as F
 from torch import nn
-from change_detection_pytorch.base import Decoder
-from change_detection_pytorch.stanet.BAM import BAM
-from change_detection_pytorch.stanet.PAM2 import PAM
+from ..base import Decoder
+from .BAM import BAM
+from .PAM2 import PAM
 
 
 def weights_init(m):
@@ -45,11 +45,12 @@ def weights_init(m):
 class STANetDecoder(Decoder):
     def __init__(
             self,
+            encoder_out_channels,
             f_c=64,
             sa_mode='PAM'
     ):
         super(STANetDecoder, self).__init__()
-        self.backbone_decoder = BackboneDecoder(f_c, nn.BatchNorm2d)
+        self.backbone_decoder = BackboneDecoder(f_c, nn.BatchNorm2d, encoder_out_channels)
         self.netA = CDSA(in_c=64, ds=1, mode=sa_mode)
 
     def forward(self, *features):
@@ -88,13 +89,13 @@ class CDSA(nn.Module):
 
 
 class BackboneDecoder(nn.Module):
-    def __init__(self, fc, BatchNorm):
+    def __init__(self, fc, BatchNorm, encoder_out_channels):
         super(BackboneDecoder, self).__init__()
         self.fc = fc
-        self.dr2 = DR(64, 96)
-        self.dr3 = DR(128, 96)
-        self.dr4 = DR(256, 96)
-        self.dr5 = DR(512, 96)
+        self.dr2 = DR(encoder_out_channels[2], 96)
+        self.dr3 = DR(encoder_out_channels[3], 96)
+        self.dr4 = DR(encoder_out_channels[4], 96)
+        self.dr5 = DR(encoder_out_channels[5], 96)
         self.last_conv = nn.Sequential(nn.Conv2d(384, 256, kernel_size=3, stride=1, padding=1, bias=False),
                                        BatchNorm(256),
                                        nn.ReLU(),
@@ -149,15 +150,15 @@ class DR(nn.Module):
         return x
 
 
-if __name__ == '__main__':
-    from change_detection_pytorch.encoders import get_encoder
-
-    samples = torch.ones([1, 3, 256, 256])
-    encoder = get_encoder('resnet34')
-    features0 = encoder(samples)
-    for fc in features0:
-        print(fc.size())
-    features1 = encoder(samples)
-    model = STANetDecoder()
-    features0, features1 = model(features0, features1)
-    print(features0, features1)
+# if __name__ == '__main__':
+#     from change_detection_pytorch.encoders import get_encoder
+#
+#     samples = torch.ones([1, 3, 256, 256])
+#     encoder = get_encoder('resnet34')
+#     features0 = encoder(samples)
+#     for fc in features0:
+#         print(fc.size())
+#     features1 = encoder(samples)
+#     model = STANetDecoder(encoder_out_channels=encoder.out_channels)
+#     features0, features1 = model(features0, features1)
+#     print(features0, features1)
