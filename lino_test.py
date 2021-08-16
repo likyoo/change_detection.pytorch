@@ -2,7 +2,6 @@ import torch
 from change_detection_pytorch.stanet import STANet
 
 if __name__ == '__main__':
-    from change_detection_pytorch.encoders import get_encoder
 
     samples = torch.ones([1, 3, 256, 256])
     model = STANet(
