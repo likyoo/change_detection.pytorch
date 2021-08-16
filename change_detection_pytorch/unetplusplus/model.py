@@ -41,6 +41,8 @@ class UnetPlusPlus(SegmentationModel):
         siam_encoder: Whether using siamese branch. Default is True
         fusion_form: The form of fusing features from two branches. Available options are **"concat"**, **"sum"**, and **"diff"**.
             Default is **concat**
+        seg_ensemble: The module used to get ensemble result of UNet++. Available options are **None** and **ecam**.
+            ECAM paper - https://ieeexplore.ieee.org/document/9355573
 
     Returns:
         ``torch.nn.Module``: **Unet++**
@@ -63,7 +65,8 @@ class UnetPlusPlus(SegmentationModel):
         activation: Optional[Union[str, callable]] = None,
         aux_params: Optional[dict] = None,
         siam_encoder: bool = True,
-        fusion_form: str = "concat",
+        fusion_form: str = "diff",
+        seg_ensemble: Optional[str] = None,
     ):
         super().__init__()
 
@@ -92,6 +95,7 @@ class UnetPlusPlus(SegmentationModel):
             center=True if encoder_name.startswith("vgg") else False,
             attention_type=decoder_attention_type,
             fusion_form=fusion_form,
+            seg_ensemble=seg_ensemble,
         )
 
         self.segmentation_head = SegmentationHead(

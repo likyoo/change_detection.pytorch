@@ -97,6 +97,10 @@ class CBAMSpatial(nn.Module):
 
 
 class CBAM(nn.Module):
+    """
+    Woo S, Park J, Lee J Y, et al. Cbam: Convolutional block attention module[C]
+    //Proceedings of the European conference on computer vision (ECCV).
+    """
     def __init__(self, in_channels, reduction=16, kernel_size=7):
         super(CBAM, self).__init__()
         self.ChannelGate = CBAMChannel(in_channels, reduction)
@@ -106,6 +110,32 @@ class CBAM(nn.Module):
         x = self.ChannelGate(x)
         x = self.SpatialGate(x)
         return x
+
+
+class ECAM(nn.Module):
+    """
+    Ensemble Channel Attention Module for UNetPlusPlus.
+    Fang S, Li K, Shao J, et al. SNUNet-CD: A Densely Connected Siamese Network for Change Detection of VHR Images[J].
+    IEEE Geoscience and Remote Sensing Letters, 2021.
+    """
+    def __init__(self, in_channels, out_channels, map_num=4):
+        super(ECAM, self).__init__()
+        self.ca1 = CBAMChannel(in_channels * map_num, reduction=16)
+        self.ca2 = CBAMChannel(in_channels, reduction=16 // 4)
+        self.up = nn.ConvTranspose2d(in_channels * map_num, in_channels * map_num, 2, stride=2)
+        self.conv_final = nn.Conv2d(in_channels * map_num, out_channels, kernel_size=1)
+
+    def forward(self, x):
+        """
+        x (list[tensor] or tuple(tensor))
+        """
+        out = torch.cat(x, 1)
+        intra = torch.sum(torch.stack(x), dim=0)
+        ca2 = self.ca2(intra)
+        out = self.ca1(out) * (out + ca2.repeat(1, 4, 1, 1))
+        out = self.up(out)
+        out = self.conv_final(out)
+        return out
 
 
 class ArgMax(nn.Module):
