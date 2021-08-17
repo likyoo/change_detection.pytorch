@@ -47,14 +47,16 @@ class SVCD_Dataset(CustomDataset):
         to_tensor_axis_bias = 2 if self.debug else 0
 
         if not self.ann_dir:
-            img_info = self.prepare_img(idx)
-            img = np.concatenate((img_info['img']['img1'], img_info['img']['img2']), axis=2)
+            ann = None
+            img1, img2, filename = self.prepare_img(idx)
+            img = np.concatenate((img1, img2), axis=2)
             transformed_image = self.transform(image=img)['image']
         else:
-            img_info = self.prepare_img_ann(idx)
-            img = np.concatenate((img_info['img']['img1'], img_info['img']['img2']), axis=2)
-            transformed_data = self.transform(image=img, mask=img_info['ann']['ann'])
-            transformed_image, img_info['ann']['ann'] = transformed_data['image'], transformed_data['mask']
+            img1, img2, ann, filename = self.prepare_img_ann(idx)
+            img = np.concatenate((img1, img2), axis=2)
+            transformed_data = self.transform(image=img, mask=ann)
+            transformed_image, ann = transformed_data['image'], transformed_data['mask']
 
-        img_info['img']['img1'], img_info['img']['img2'] = np.split(transformed_image, 2, axis=0+to_tensor_axis_bias)
-        return img_info
+        img1, img2 = np.split(transformed_image, 2, axis=0+to_tensor_axis_bias)
+
+        return img1, img2, ann, filename

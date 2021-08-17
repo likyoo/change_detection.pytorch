@@ -45,7 +45,7 @@ class Epoch:
         """
         Infer and save results.
         Note: Currently only batch_size=1 is supported.
-        Weakly robust
+        Weakly robust, Unclearly defined.
         'image_size' and 'window_size' work when slide is True.
         """
         import cv2
@@ -54,10 +54,7 @@ class Epoch:
         self.model.eval()
 
         with tqdm(dataloader, desc=self.stage_name, file=sys.stdout, disable=not (self.verbose)) as iterator:
-            for img_info in iterator:
-
-                x1, x2 = img_info['img']['img1'], img_info['img']['img2']
-                y = img_info['ann']['ann']
+            for (x1, x2, y, filename) in iterator:
 
                 x1, x2, y = self.check_tensor(x1, False), self.check_tensor(x2, False), \
                             self.check_tensor(y, True)
@@ -76,10 +73,10 @@ class Epoch:
                         inf_seg_maps.append(np.concatenate([y_pred[i] for i in range(window_idx[row_idx],
                                                                                      window_idx[row_idx + 1])], axis=1))
                     inf_seg_maps = np.concatenate([row for row in inf_seg_maps], axis=0)
-                    cv2.imwrite(osp.join(save_dir, img_info['filename'][0]), inf_seg_maps)
+                    cv2.imwrite(osp.join(save_dir, filename), inf_seg_maps)
                 else:
                     # To be verified
-                    cv2.imwrite(osp.join(save_dir, img_info['filename'][0]), y_pred)
+                    cv2.imwrite(osp.join(save_dir, filename), y_pred)
 
     def run(self, dataloader):
 
@@ -90,10 +87,7 @@ class Epoch:
         metrics_meters = {metric.__name__: AverageValueMeter() for metric in self.metrics}
 
         with tqdm(dataloader, desc=self.stage_name, file=sys.stdout, disable=not (self.verbose)) as iterator:
-            for img_info in iterator:
-
-                x1, x2 = img_info['img']['img1'], img_info['img']['img2']
-                y = img_info['ann']['ann']
+            for (x1, x2, y, filename) in iterator:
 
                 x1, x2, y = self.check_tensor(x1, False), self.check_tensor(x2, False), \
                             self.check_tensor(y, True)
@@ -102,14 +96,14 @@ class Epoch:
                 loss, y_pred = self.batch_update(x1, x2, y)
 
                 # update loss logs
-                loss_value = loss.detach().cpu().numpy()  # loss.cpu().detach().numpy()
+                loss_value = loss.detach().cpu().numpy()
                 loss_meter.add(loss_value)
                 loss_logs = {self.loss.__name__: loss_meter.mean}
                 logs.update(loss_logs)
 
                 # update metrics logs
                 for metric_fn in self.metrics:
-                    metric_value = metric_fn(y_pred, y).detach().cpu().numpy()  # .cpu().detach().numpy()
+                    metric_value = metric_fn(y_pred, y).detach().cpu().numpy()
                     metrics_meters[metric_fn.__name__].add(metric_value)
                 metrics_logs = {k: v.mean for k, v in metrics_meters.items()}
                 logs.update(metrics_logs)

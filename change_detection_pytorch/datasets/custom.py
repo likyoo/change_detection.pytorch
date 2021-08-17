@@ -162,33 +162,6 @@ class CustomDataset(Dataset):
         """Set the test transformation."""
         pass
 
-    def prepare_img_ann(self, idx):
-        """Get image and annotations after pipeline.
-        Args:
-            idx (int): Index of data.
-        Returns:
-            dict: Image and annotation after pipeline with new keys
-                introduced by pipeline.
-        """
-
-        img_info = self.img_infos[idx]
-        self.get_image(img_info)
-        self.get_gt_seg_maps(img_info, self.debug)
-        return img_info
-
-    def prepare_img(self, idx):
-        """Get image after pipeline.
-        Args:
-            idx (int): Index of data.
-        Returns:
-            dict: Image after pipeline with new keys introduced by
-                pipeline.
-        """
-
-        img_info = self.img_infos[idx]
-        self.get_image(img_info)
-        return img_info
-
     def get_image(self, img_info):
         """Open and read the image.
         Args:
@@ -197,11 +170,9 @@ class CustomDataset(Dataset):
             dict: image info with new keys.
         """
 
-        img_info['img']['img1'] = cv2.cvtColor(cv2.imread(img_info['img']['img1_path']),
-                                               cv2.COLOR_BGR2RGB)
-        img_info['img']['img2'] = cv2.cvtColor(cv2.imread(img_info['img']['img2_path']),
-                                               cv2.COLOR_BGR2RGB)
-        return img_info
+        img1 = cv2.cvtColor(cv2.imread(img_info['img']['img1_path']), cv2.COLOR_BGR2RGB)
+        img2 = cv2.cvtColor(cv2.imread(img_info['img']['img2_path']), cv2.COLOR_BGR2RGB)
+        return img1, img2
 
     def get_gt_seg_maps(self, img_info, vis=False):
         """Open and read the ground truth.
@@ -214,8 +185,34 @@ class CustomDataset(Dataset):
 
         ann = cv2.imread(img_info['ann']['ann_path'], cv2.IMREAD_GRAYSCALE)
         ann = ann / 255 if not vis else ann
-        img_info['ann']['ann'] = ann
-        return img_info
+        return ann
+
+    def prepare_img(self, idx):
+        """Get image after pipeline.
+        Args:
+            idx (int): Index of data.
+        Returns:
+            dict: Image after pipeline with new keys introduced by
+                pipeline.
+        """
+
+        img_info = self.img_infos[idx]
+        img1, img2 = self.get_image(img_info)
+        return img1, img2, img_info['filename']
+
+    def prepare_img_ann(self, idx):
+        """Get image and annotations after pipeline.
+        Args:
+            idx (int): Index of data.
+        Returns:
+            dict: Image and annotation after pipeline with new keys
+                introduced by pipeline.
+        """
+
+        img_info = self.img_infos[idx]
+        img1, img2 = self.get_image(img_info)
+        ann = self.get_gt_seg_maps(img_info, self.debug)
+        return img1, img2, ann, img_info['filename']
 
     def format_results(self, results, **kwargs):
         """Place holder to format result to datasets specific output."""
