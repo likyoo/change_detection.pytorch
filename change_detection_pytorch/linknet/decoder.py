@@ -1,7 +1,6 @@
 import torch.nn as nn
 
-from ..base import modules
-from ..base import Decoder
+from ..base import Decoder, modules
 
 
 class TransposeX2(nn.Sequential):

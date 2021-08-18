@@ -1,7 +1,8 @@
 from typing import Optional, Union
-from .decoder import LinknetDecoder
-from ..base import SegmentationHead, SegmentationModel, ClassificationHead
+
+from ..base import ClassificationHead, SegmentationHead, SegmentationModel
 from ..encoders import get_encoder
+from .decoder import LinknetDecoder
 
 
 class Linknet(SegmentationModel):
