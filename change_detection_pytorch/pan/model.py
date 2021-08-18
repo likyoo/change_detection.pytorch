@@ -1,8 +1,8 @@
 from typing import Optional, Union
-from .decoder import PANDecoder
+
+from ..base import ClassificationHead, SegmentationHead, SegmentationModel
 from ..encoders import get_encoder
-from ..base import SegmentationModel
-from ..base import SegmentationHead, ClassificationHead
+from .decoder import PANDecoder
 
 
 class PAN(SegmentationModel):
@@ -32,6 +32,9 @@ class PAN(SegmentationModel):
                 - pooling (str): One of "max", "avg". Default is "avg"
                 - dropout (float): Dropout factor in [0, 1)
                 - activation (str): An activation function to apply "sigmoid"/"softmax" (could be **None** to return logits)
+        siam_encoder: Whether using siamese branch. Default is True
+        fusion_form: The form of fusing features from two branches. Available options are **"concat"**, **"sum"**, and **"diff"**.
+            Default is **concat**
 
     Returns:
         ``torch.nn.Module``: **PAN**
@@ -42,21 +45,25 @@ class PAN(SegmentationModel):
     """
 
     def __init__(
-            self,
-            encoder_name: str = "resnet34",
-            encoder_weights: Optional[str] = "imagenet",
-            encoder_output_stride: int = 16,
-            decoder_channels: int = 32,
-            in_channels: int = 3,
-            classes: int = 1,
-            activation: Optional[Union[str, callable]] = None,
-            upsampling: int = 4,
-            aux_params: Optional[dict] = None
+        self,
+        encoder_name: str = "resnet34",
+        encoder_weights: Optional[str] = "imagenet",
+        encoder_output_stride: int = 16,
+        decoder_channels: int = 32,
+        in_channels: int = 3,
+        classes: int = 1,
+        activation: Optional[Union[str, callable]] = None,
+        upsampling: int = 4,
+        aux_params: Optional[dict] = None,
+        siam_encoder: bool = True,
+        fusion_form: str = "concat",
     ):
         super().__init__()
 
         if encoder_output_stride not in [16, 32]:
             raise ValueError("PAN support output stride 16 or 32, got {}".format(encoder_output_stride))
+
+        self.siam_encoder = siam_encoder
 
         self.encoder = get_encoder(
             encoder_name,
@@ -66,9 +73,19 @@ class PAN(SegmentationModel):
             output_stride=encoder_output_stride,
         )
 
+        if not self.siam_encoder:
+            self.encoder_non_siam = get_encoder(
+                encoder_name,
+                in_channels=in_channels,
+                depth=5,
+                weights=encoder_weights,
+                output_stride=encoder_output_stride,
+            )
+
         self.decoder = PANDecoder(
             encoder_channels=self.encoder.out_channels,
             decoder_channels=decoder_channels,
+            fusion_form=fusion_form,
         )
 
         self.segmentation_head = SegmentationHead(

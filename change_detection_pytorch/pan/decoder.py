@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from ..base import Decoder
+
 
 class ConvBnRelu(nn.Module):
     def __init__(
@@ -141,15 +143,21 @@ class GAUBlock(nn.Module):
         return y_up + z
 
 
-class PANDecoder(nn.Module):
+class PANDecoder(Decoder):
 
     def __init__(
             self,
             encoder_channels,
             decoder_channels,
-            upscale_mode: str = 'bilinear'
+            upscale_mode: str = 'bilinear',
+            fusion_form="concat",
     ):
         super().__init__()
+
+        # adjust encoder channels according to fusion form
+        self.fusion_form = fusion_form
+        if self.fusion_form == "concat":
+            encoder_channels = [ch * 2 for ch in encoder_channels]
 
         self.fpa = FPABlock(in_channels=encoder_channels[-1], out_channels=decoder_channels)
         self.gau3 = GAUBlock(in_channels=encoder_channels[-2], out_channels=decoder_channels, upscale_mode=upscale_mode)
@@ -157,6 +165,9 @@ class PANDecoder(nn.Module):
         self.gau1 = GAUBlock(in_channels=encoder_channels[-4], out_channels=decoder_channels, upscale_mode=upscale_mode)
 
     def forward(self, *features):
+
+        features = self.aggregation_layer(features[0], features[1],
+                                          self.fusion_form, ignore_original_img=True)
         bottleneck = features[-1]
         x5 = self.fpa(bottleneck)         # 1/32
         x4 = self.gau3(features[-2], x5)  # 1/16
