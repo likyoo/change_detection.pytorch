@@ -31,7 +31,7 @@ Please refer to local_test.py temporarily.
 
 - [x] MAnet [[paper](https://ieeexplore.ieee.org/abstract/document/9201310)]
 
-- [ ] Linknet [[paper](https://arxiv.org/abs/1707.03718)]
+- [x] Linknet [[paper](https://arxiv.org/abs/1707.03718)]
 
 - [ ] FPN [[paper](http://presentations.cocodataset.org/COCO17-Stuff-FAIR.pdf)]
 
