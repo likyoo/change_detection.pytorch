@@ -33,7 +33,7 @@ Please refer to local_test.py temporarily.
 
 - [x] Linknet [[paper](https://arxiv.org/abs/1707.03718)]
 
-- [ ] FPN [[paper](http://presentations.cocodataset.org/COCO17-Stuff-FAIR.pdf)]
+- [x] FPN [[paper](http://presentations.cocodataset.org/COCO17-Stuff-FAIR.pdf)]
 
 - [x] PSPNet [[paper](https://arxiv.org/abs/1612.01105)]
 

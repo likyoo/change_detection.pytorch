@@ -1,7 +1,8 @@
 from typing import Optional, Union
-from .decoder import FPNDecoder
-from ..base import SegmentationModel, SegmentationHead, ClassificationHead
+
+from ..base import ClassificationHead, SegmentationHead, SegmentationModel
 from ..encoders import get_encoder
+from .decoder import FPNDecoder
 
 
 class FPN(SegmentationModel):
@@ -32,6 +33,9 @@ class FPN(SegmentationModel):
                 - pooling (str): One of "max", "avg". Default is "avg"
                 - dropout (float): Dropout factor in [0, 1)
                 - activation (str): An activation function to apply "sigmoid"/"softmax" (could be **None** to return logits)
+        siam_encoder: Whether using siamese branch. Default is True
+        fusion_form: The form of fusing features from two branches. Available options are **"concat"**, **"sum"**, and **"diff"**.
+            Default is **concat**
 
     Returns:
         ``torch.nn.Module``: **FPN**
@@ -55,8 +59,12 @@ class FPN(SegmentationModel):
         activation: Optional[str] = None,
         upsampling: int = 4,
         aux_params: Optional[dict] = None,
+        siam_encoder: bool = True,
+        fusion_form: str = "concat",
     ):
         super().__init__()
+
+        self.siam_encoder = siam_encoder
 
         self.encoder = get_encoder(
             encoder_name,
@@ -65,6 +73,14 @@ class FPN(SegmentationModel):
             weights=encoder_weights,
         )
 
+        if not self.siam_encoder:
+            self.encoder_non_siam = get_encoder(
+                encoder_name,
+                in_channels=in_channels,
+                depth=encoder_depth,
+                weights=encoder_weights,
+            )
+
         self.decoder = FPNDecoder(
             encoder_channels=self.encoder.out_channels,
             encoder_depth=encoder_depth,
@@ -72,6 +88,7 @@ class FPN(SegmentationModel):
             segmentation_channels=decoder_segmentation_channels,
             dropout=decoder_dropout,
             merge_policy=decoder_merge_policy,
+            fusion_form=fusion_form,
         )
 
         self.segmentation_head = SegmentationHead(

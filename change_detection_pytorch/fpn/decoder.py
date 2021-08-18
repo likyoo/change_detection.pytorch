@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from ..base import Decoder
+
 
 class Conv3x3GNReLU(nn.Module):
     def __init__(self, in_channels, out_channels, upsample=False):
@@ -72,7 +74,7 @@ class MergeBlock(nn.Module):
             )
 
 
-class FPNDecoder(nn.Module):
+class FPNDecoder(Decoder):
     def __init__(
             self,
             encoder_channels,
@@ -81,6 +83,7 @@ class FPNDecoder(nn.Module):
             segmentation_channels=128,
             dropout=0.2,
             merge_policy="add",
+            fusion_form="concat",
     ):
         super().__init__()
 
@@ -90,6 +93,11 @@ class FPNDecoder(nn.Module):
 
         encoder_channels = encoder_channels[::-1]
         encoder_channels = encoder_channels[:encoder_depth + 1]
+
+        # adjust encoder channels according to fusion form
+        self.fusion_form = fusion_form
+        if self.fusion_form == "concat":
+            encoder_channels = [ch*2 for ch in encoder_channels]
 
         self.p5 = nn.Conv2d(encoder_channels[0], pyramid_channels, kernel_size=1)
         self.p4 = FPNBlock(pyramid_channels, encoder_channels[1])
@@ -105,6 +113,9 @@ class FPNDecoder(nn.Module):
         self.dropout = nn.Dropout2d(p=dropout, inplace=True)
 
     def forward(self, *features):
+
+        features = self.aggregation_layer(features[0], features[1],
+                                          self.fusion_form, ignore_original_img=True)
         c2, c3, c4, c5 = features[-4:]
 
         p5 = self.p5(c5)
