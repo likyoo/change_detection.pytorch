@@ -36,6 +36,9 @@ class Linknet(SegmentationModel):
                 - pooling (str): One of "max", "avg". Default is "avg"
                 - dropout (float): Dropout factor in [0, 1)
                 - activation (str): An activation function to apply "sigmoid"/"softmax" (could be **None** to return logits)
+        siam_encoder: Whether using siamese branch. Default is True
+        fusion_form: The form of fusing features from two branches. Available options are **"concat"**, **"sum"**, and **"diff"**.
+            Default is **concat**
 
     Returns:
         ``torch.nn.Module``: **Linknet**
@@ -54,8 +57,12 @@ class Linknet(SegmentationModel):
         classes: int = 1,
         activation: Optional[Union[str, callable]] = None,
         aux_params: Optional[dict] = None,
+        siam_encoder: bool = True,
+        fusion_form: str = "concat",
     ):
         super().__init__()
+
+        self.siam_encoder = siam_encoder
 
         self.encoder = get_encoder(
             encoder_name,
@@ -64,11 +71,20 @@ class Linknet(SegmentationModel):
             weights=encoder_weights,
         )
 
+        if not self.siam_encoder:
+            self.encoder_non_siam = get_encoder(
+                encoder_name,
+                in_channels=in_channels,
+                depth=encoder_depth,
+                weights=encoder_weights,
+            )
+
         self.decoder = LinknetDecoder(
             encoder_channels=self.encoder.out_channels,
             n_blocks=encoder_depth,
             prefinal_channels=32,
             use_batchnorm=decoder_use_batchnorm,
+            fusion_form=fusion_form,
         )
 
         self.segmentation_head = SegmentationHead(

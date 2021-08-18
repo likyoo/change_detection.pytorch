@@ -1,6 +1,7 @@
 import torch.nn as nn
 
 from ..base import modules
+from ..base import Decoder
 
 
 class TransposeX2(nn.Sequential):
@@ -35,7 +36,7 @@ class DecoderBlock(nn.Module):
         return x
 
 
-class LinknetDecoder(nn.Module):
+class LinknetDecoder(Decoder):
 
     def __init__(
             self,
@@ -43,11 +44,17 @@ class LinknetDecoder(nn.Module):
             prefinal_channels=32,
             n_blocks=5,
             use_batchnorm=True,
+            fusion_form="concat",
     ):
         super().__init__()
 
         encoder_channels = encoder_channels[1:]  # remove first skip
         encoder_channels = encoder_channels[::-1]  # reverse channels to start from head of encoder
+
+        # adjust encoder channels according to fusion form
+        self.fusion_form = fusion_form
+        if self.fusion_form == "concat":
+            encoder_channels = [ch*2 for ch in encoder_channels]
 
         channels = list(encoder_channels) + [prefinal_channels]
 
@@ -57,7 +64,10 @@ class LinknetDecoder(nn.Module):
         ])
 
     def forward(self, *features):
-        features = features[1:]  # remove first skip
+
+        features = self.aggregation_layer(features[0], features[1],
+                                          self.fusion_form, ignore_original_img=True)
+        # features = features[1:]    # remove first skip with same spatial resolution
         features = features[::-1]  # reverse channels to start from head of encoder
 
         x = features[0]
