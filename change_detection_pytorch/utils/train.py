@@ -73,10 +73,10 @@ class Epoch:
                         inf_seg_maps.append(np.concatenate([y_pred[i] for i in range(window_idx[row_idx],
                                                                                      window_idx[row_idx + 1])], axis=1))
                     inf_seg_maps = np.concatenate([row for row in inf_seg_maps], axis=0)
-                    cv2.imwrite(osp.join(save_dir, filename), inf_seg_maps)
+                    cv2.imwrite(osp.join(save_dir, filename[0]), inf_seg_maps)
                 else:
                     # To be verified
-                    cv2.imwrite(osp.join(save_dir, filename), y_pred)
+                    cv2.imwrite(osp.join(save_dir, filename[0]), y_pred)
 
     def run(self, dataloader):
 
