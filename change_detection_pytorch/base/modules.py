@@ -117,6 +117,8 @@ class ECAM(nn.Module):
     Ensemble Channel Attention Module for UNetPlusPlus.
     Fang S, Li K, Shao J, et al. SNUNet-CD: A Densely Connected Siamese Network for Change Detection of VHR Images[J].
     IEEE Geoscience and Remote Sensing Letters, 2021.
+
+    Not completely consistent, to be improved.
     """
     def __init__(self, in_channels, out_channels, map_num=4):
         super(ECAM, self).__init__()
