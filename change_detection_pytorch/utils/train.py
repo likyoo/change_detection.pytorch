@@ -41,42 +41,61 @@ class Epoch:
             return data if data.ndim <= 4 else data.squeeze()
         return data if data.ndim <= 3 else data.squeeze()
 
-    def infer_vis(self, dataloader, slide=False, image_size=1024, window_size=256, save_dir='./res'):
+    def infer_vis(self, dataloader, save=True, evaluate=False, slide=False, image_size=1024,
+                  window_size=256, save_dir='./res', suffix='.tif'):
         """
         Infer and save results.
         Note: Currently only batch_size=1 is supported.
-        Weakly robust, Unclearly defined.
+        Weakly robust.
         'image_size' and 'window_size' work when slide is True.
         """
         import cv2
         import numpy as np
 
         self.model.eval()
+        logs = {}
+        metrics_meters = {metric.__name__: AverageValueMeter() for metric in self.metrics}
 
         with tqdm(dataloader, desc=self.stage_name, file=sys.stdout, disable=not (self.verbose)) as iterator:
             for (x1, x2, y, filename) in iterator:
+
+                assert y is not None or not evaluate, "When the label is None, the evaluation mode cannot be turned on."
 
                 x1, x2, y = self.check_tensor(x1, False), self.check_tensor(x2, False), \
                             self.check_tensor(y, True)
                 x1, x2, y = x1.float(), x2.float(), y.long()
                 x1, x2, y = x1.to(self.device), x2.to(self.device), y.to(self.device)
-                loss, y_pred = self.batch_update(x1, x2, y)
+                y_pred = self.model.forward(x1, x2)
 
-                y_pred = torch.argmax(y_pred, dim=1).squeeze().cpu().numpy().round()
-                y_pred = y_pred * 255
+                if evaluate:
+                    # update metrics logs
+                    for metric_fn in self.metrics:
+                        metric_value = metric_fn(y_pred, y).detach().cpu().numpy()
+                        metrics_meters[metric_fn.__name__].add(metric_value)
+                    metrics_logs = {k: v.mean for k, v in metrics_meters.items()}
+                    logs.update(metrics_logs)
 
-                if slide:
-                    inf_seg_maps = []
-                    window_num = image_size // window_size
-                    window_idx = [i for i in range(0, window_num ** 2 + 1, window_num)]
-                    for row_idx in range(len(window_idx) - 1):
-                        inf_seg_maps.append(np.concatenate([y_pred[i] for i in range(window_idx[row_idx],
-                                                                                     window_idx[row_idx + 1])], axis=1))
-                    inf_seg_maps = np.concatenate([row for row in inf_seg_maps], axis=0)
-                    cv2.imwrite(osp.join(save_dir, filename[0]), inf_seg_maps)
-                else:
-                    # To be verified
-                    cv2.imwrite(osp.join(save_dir, filename[0]), y_pred)
+                    if self.verbose:
+                        s = self._format_logs(logs)
+                        iterator.set_postfix_str(s)
+
+                if save:
+                    y_pred = torch.argmax(y_pred, dim=1).squeeze().cpu().numpy().round()
+                    y_pred = y_pred * 255
+                    filename = filename[0].split('.')[0] + suffix
+
+                    if slide:
+                        inf_seg_maps = []
+                        window_num = image_size // window_size
+                        window_idx = [i for i in range(0, window_num ** 2 + 1, window_num)]
+                        for row_idx in range(len(window_idx) - 1):
+                            inf_seg_maps.append(np.concatenate([y_pred[i] for i in range(window_idx[row_idx],
+                                                                                         window_idx[row_idx + 1])], axis=1))
+                        inf_seg_maps = np.concatenate([row for row in inf_seg_maps], axis=0)
+                        cv2.imwrite(osp.join(save_dir, filename), inf_seg_maps)
+                    else:
+                        # To be verified
+                        cv2.imwrite(osp.join(save_dir, filename), y_pred)
 
     def run(self, dataloader):
 
