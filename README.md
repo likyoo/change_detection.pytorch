@@ -29,7 +29,7 @@ Please refer to local_test.py temporarily.
 
 - [x] Unet++ [[paper](https://arxiv.org/pdf/1807.10165.pdf)]
 
-- [ ] MAnet [[paper](https://ieeexplore.ieee.org/abstract/document/9201310)]
+- [x] MAnet [[paper](https://ieeexplore.ieee.org/abstract/document/9201310)]
 
 - [ ] Linknet [[paper](https://arxiv.org/abs/1707.03718)]
 

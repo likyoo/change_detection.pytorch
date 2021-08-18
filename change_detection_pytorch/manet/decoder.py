@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+from ..base import Decoder
 from ..base import modules as md
 
 
@@ -133,7 +135,7 @@ class DecoderBlock(nn.Module):
         return x
 
 
-class MAnetDecoder(nn.Module):
+class MAnetDecoder(Decoder):
     def __init__(
             self,
             encoder_channels,
@@ -141,7 +143,8 @@ class MAnetDecoder(nn.Module):
             n_blocks=5,
             reduction=16,
             use_batchnorm=True,
-            pab_channels=64
+            pab_channels=64,
+            fusion_form="concat",
     ):
         super().__init__()
 
@@ -161,6 +164,12 @@ class MAnetDecoder(nn.Module):
         skip_channels = list(encoder_channels[1:]) + [0]
         out_channels = decoder_channels
 
+        # adjust encoder channels according to fusion form
+        self.fusion_form = fusion_form
+        if self.fusion_form == "concat":
+            skip_channels = [ch*2 for ch in skip_channels]
+            in_channels[0] = in_channels[0] * 2
+
         self.center = PAB(head_channels, head_channels, pab_channels=pab_channels)
 
         # combine decoder keyword arguments
@@ -175,7 +184,9 @@ class MAnetDecoder(nn.Module):
 
     def forward(self, *features):
 
-        features = features[1:]    # remove first skip with same spatial resolution
+        features = self.aggregation_layer(features[0], features[1],
+                                          self.fusion_form, ignore_original_img=True)
+        # features = features[1:]    # remove first skip with same spatial resolution
         features = features[::-1]  # reverse channels to start from head of encoder
 
         head = features[0]
