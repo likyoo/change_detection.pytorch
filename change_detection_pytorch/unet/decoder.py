@@ -99,6 +99,7 @@ class UnetDecoder(Decoder):
         if self.fusion_form == "concat":
             skip_channels = [ch*2 for ch in skip_channels]
             in_channels[0] = in_channels[0] * 2
+            head_channels = head_channels * 2
 
         if center:
             self.center = CenterBlock(
