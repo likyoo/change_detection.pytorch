@@ -37,7 +37,7 @@ Please refer to local_test.py temporarily.
 
 - [x] PSPNet [[paper](https://arxiv.org/abs/1612.01105)]
 
-- [ ] PAN [[paper](https://arxiv.org/abs/1805.10180)]
+- [x] PAN [[paper](https://arxiv.org/abs/1805.10180)]
 
 - [x] DeepLabV3 [[paper](https://arxiv.org/abs/1706.05587)]
 
