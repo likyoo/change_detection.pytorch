@@ -1,12 +1,14 @@
 """
-The pipeline of Albumentations augmentation
+The pipeline of Albumentations augmentation.
 
 """
 
 from __future__ import absolute_import
 
+import random
 import warnings
 from abc import ABC
+from collections.abc import Sequence
 from types import LambdaType
 
 import numpy as np
@@ -18,7 +20,7 @@ from albumentations.core.transforms_interface import (BasicTransform,
 from albumentations.core.utils import format_args
 from torchvision.transforms import functional as F
 
-__all__ = ["ToTensorTest", "ChunkImage", "ExchangeTime"]
+__all__ = ["ToTensorTest", "ChunkImage", "ExchangeTime", "RandomChoice"]
 
 
 class ToTensorTest(BasicTransform):
@@ -133,3 +135,20 @@ class ExchangeTime(ImageOnlyTransform):
         idx1 = img.shape[-1] // 2
         idx2 = img.shape[-1] + 1
         return np.dstack((img[:, :, idx1:idx2], img[:, :, 0:idx1]))
+
+
+class RandomChoice(BasicTransform):
+    """Apply single transformation randomly picked from a list.
+    """
+
+    def __init__(self, transforms, always_apply=True, p=1.0):
+        super(RandomChoice, self).__init__(always_apply=always_apply, p=p)
+        if not isinstance(transforms, Sequence):
+            raise TypeError("Argument transforms should be a sequence")
+        self.transforms = transforms
+
+    def __call__(self, force_apply=False, **kwargs):
+        image, mask = kwargs['image'], kwargs['mask']
+        t = random.choice(self.transforms)
+        return t(image=image, mask=mask)
+
