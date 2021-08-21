@@ -22,6 +22,7 @@ from .timm_sknet import timm_sknet_encoders
 from .timm_universal import TimmUniversalEncoder
 from .vgg import vgg_encoders
 from .xception import xception_encoders
+from .swin_transformer import swin_trans_encoders
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -43,6 +44,7 @@ encoders.update(timm_regnet_encoders)
 encoders.update(timm_sknet_encoders)
 encoders.update(timm_mobilenetv3_encoders)
 encoders.update(timm_gernet_encoders)
+encoders.update(swin_trans_encoders)
 
 
 def get_encoder(name, in_channels=3, depth=5, weights=None, output_stride=32, **kwargs):
