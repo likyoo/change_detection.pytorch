@@ -43,6 +43,8 @@ Please refer to local_test.py temporarily.
 
 - [x] DeepLabV3+ [[paper](https://arxiv.org/abs/1802.02611)]
 
+- [ ] UPerNet [[paper](https://arxiv.org/abs/1807.10221)]
+
 #### Encoders <a name="encoders"></a>
 
 The following is a list of supported encoders in the CDP. Select the appropriate family of encoders and click to expand the table and select a specific encoder and its pre-trained weights (`encoder_name` and `encoder_weights` parameters).
