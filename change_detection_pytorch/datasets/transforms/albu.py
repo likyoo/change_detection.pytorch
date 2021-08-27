@@ -19,6 +19,12 @@ from albumentations.core.transforms_interface import (BasicTransform,
                                                       to_tuple)
 from albumentations.core.utils import format_args
 from torchvision.transforms import functional as F
+import cv2
+
+try:
+    from albumentations.augmentations.functional import random_crop
+except:
+    from albumentations.augmentations.crops.functional import random_crop
 
 __all__ = ["ToTensorTest", "ChunkImage", "ExchangeTime", "RandomChoice"]
 
@@ -84,17 +90,20 @@ class ChunkImage(DualTransform):
         h, w = data.shape[:2]
         patch_num = h // size
         if data.ndim == 3:
+            # data (1024, 1024, 3)
             c = data.shape[-1]
             data = np.lib.stride_tricks.as_strided(data, (patch_num, patch_num, size, size, c),
                                                    tuple(
                                                        np.array([size * h * c, size * c, h * c, c, 1]) * data.itemsize))
             # data (4, 4, 256, 256, 3)
             data = np.reshape(data, (-1, size, size, c))
+            # data (16, 256, 256, 3)
         elif data.ndim == 2:
             data = np.lib.stride_tricks.as_strided(data, (patch_num, patch_num, size, size),
                                                    tuple(np.array([size * h, size, h, 1]) * data.itemsize))
             # data (4, 4, 256, 256)
             data = np.reshape(data, (-1, size, size))
+            # data (16, 256, 256)
         else:
             raise ValueError('the {}-dim data is not supported'.format(data.ndim))
 
@@ -103,8 +112,8 @@ class ChunkImage(DualTransform):
     def apply(self, img, **params):
         return self.chunk(img, self.size)
 
-    def apply_to_mask(self, img, **params):
-        return self.chunk(img, self.size)
+    def apply_to_mask(self, mask, **params):
+        return self.chunk(mask, self.size)
 
     def get_transform_init_args_names(self):
         return (
@@ -112,7 +121,7 @@ class ChunkImage(DualTransform):
         )
 
 
-class ExchangeTime(ImageOnlyTransform):
+class ExchangeTime(BasicTransform):
     """Exchange images of different times.
     Args:
         p (float): probability of applying the transform. Default: 0.5.
@@ -129,26 +138,14 @@ class ExchangeTime(ImageOnlyTransform):
     ):
         super(ExchangeTime, self).__init__(always_apply, p)
 
-    def apply(self, img, **params):
-        if not (img.shape[-1] & 1) == 0:
-            raise ValueError("ExchangeTime: Unequal number of channels")
-        idx1 = img.shape[-1] // 2
-        idx2 = img.shape[-1] + 1
-        return np.dstack((img[:, :, idx1:idx2], img[:, :, 0:idx1]))
-
-
-class RandomChoice(BasicTransform):
-    """Apply single transformation randomly picked from a list.
-    """
-
-    def __init__(self, transforms, always_apply=True, p=1.0):
-        super(RandomChoice, self).__init__(always_apply=always_apply, p=p)
-        if not isinstance(transforms, Sequence):
-            raise TypeError("Argument transforms should be a sequence")
-        self.transforms = transforms
-
     def __call__(self, force_apply=False, **kwargs):
-        image, mask = kwargs['image'], kwargs['mask']
-        t = random.choice(self.transforms)
-        return t(image=image, mask=mask)
+        if self.replay_mode:
+            if self.applied_in_replay:
+                return self.apply_with_params(self.params, **kwargs)
 
+            return kwargs
+
+        if (random.random() < self.p) or self.always_apply or force_apply:
+            kwargs['image'], kwargs['image_2'] = kwargs['image_2'], kwargs['image']
+
+        return kwargs

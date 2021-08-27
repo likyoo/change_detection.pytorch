@@ -8,8 +8,9 @@ import albumentations as A
 import cv2
 import numpy as np
 from albumentations.pytorch import ToTensorV2
-from change_detection_pytorch.datasets.transforms.albu import ToTensorTest
 from torch.utils.data import Dataset
+
+from .transforms.albu import ToTensorTest
 
 
 class CustomDataset(Dataset):
@@ -79,8 +80,14 @@ class CustomDataset(Dataset):
             if not (self.ann_dir is None or osp.isabs(self.ann_dir)):
                 self.ann_dir = osp.join(self.data_root, self.ann_dir)
 
+        # load annotations
+        self.img_infos = self.load_infos(self.img_dir, self.img_suffix,
+                                         self.seg_map_suffix, self.sub_dir_1,
+                                         self.sub_dir_2, self.ann_dir,
+                                         self.split)
+
         # transform/augment data
-        if transform is None:
+        if self.transform is None:
             self.transform = self.get_default_transform() if not self.test_mode \
                 else self.get_test_transform()
 
@@ -88,12 +95,6 @@ class CustomDataset(Dataset):
         if self.debug:
             self.transform = A.Compose([t for t in self.transform if not isinstance(t, (A.Normalize, ToTensorV2,
                                                                                         ToTensorTest))])
-
-        # load annotations
-        self.img_infos = self.load_infos(self.img_dir, self.img_suffix,
-                                         self.seg_map_suffix, self.sub_dir_1,
-                                         self.sub_dir_2, self.ann_dir,
-                                         self.split)
 
     def load_infos(self, img_dir, img_suffix, seg_map_suffix, sub_dir_1,
                          sub_dir_2, ann_dir, split):

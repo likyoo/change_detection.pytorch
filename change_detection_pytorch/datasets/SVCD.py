@@ -1,7 +1,6 @@
 import os.path as osp
 
 import albumentations as A
-import numpy as np
 from albumentations.pytorch import ToTensorV2
 from change_detection_pytorch.datasets.custom import CustomDataset
 
@@ -21,9 +20,9 @@ class SVCD_Dataset(CustomDataset):
             A.Resize(self.size, self.size),
             # A.HorizontalFlip(p=0.5),
             # A.RandomRotate90(p=0.5),
-            A.Normalize(mean=(0, 0, 0, 0, 0, 0), std=(1, 1, 1, 1, 1, 1)),     # div(255)
+            A.Normalize(mean=(0, 0, 0), std=(1, 1, 1)),     # div(255)
             ToTensorV2()
-        ])
+        ], additional_targets={'image_2': 'image'})
         return default_transform
 
     def get_test_transform(self):
@@ -31,9 +30,9 @@ class SVCD_Dataset(CustomDataset):
 
         test_transform = A.Compose([
             A.Resize(self.size, self.size),
-            A.Normalize(mean=(0, 0, 0, 0, 0, 0), std=(1, 1, 1, 1, 1, 1)),     # div(255)
+            A.Normalize(mean=(0, 0, 0), std=(1, 1, 1)),     # div(255)
             ToTensorV2()
-        ])
+        ], additional_targets={'image_2': 'image'})
         return test_transform
 
     def __getitem__(self, idx):
@@ -41,22 +40,18 @@ class SVCD_Dataset(CustomDataset):
         Args:
             idx (int): Index of data.
         Returns:
-            dict: Training/test data (with annotation if ann_dir is not None).
+            dict: Training/test data (with annotation if `test_mode` is set
+                False).
         """
-
-        to_tensor_axis_bias = 2 if self.debug else 0
 
         if not self.ann_dir:
             ann = None
             img1, img2, filename = self.prepare_img(idx)
-            img = np.concatenate((img1, img2), axis=2)
-            transformed_image = self.transform(image=img)['image']
+            transformed_data = self.transform(image=img1, image_2=img2)
+            img1, img2 = transformed_data['image'], transformed_data['image_2']
         else:
             img1, img2, ann, filename = self.prepare_img_ann(idx)
-            img = np.concatenate((img1, img2), axis=2)
-            transformed_data = self.transform(image=img, mask=ann)
-            transformed_image, ann = transformed_data['image'], transformed_data['mask']
-
-        img1, img2 = np.split(transformed_image, 2, axis=0+to_tensor_axis_bias)
+            transformed_data = self.transform(image=img1, image_2=img2, mask=ann)
+            img1, img2, ann = transformed_data['image'], transformed_data['image_2'], transformed_data['mask']
 
         return img1, img2, ann, filename
