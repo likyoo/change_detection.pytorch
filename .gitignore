@@ -5,3 +5,8 @@ changelog.md
 test_tt.py
 change_detection_pytorch/datasets/PRCV_CD.py
 tools
+change_detection_pytorch/V2
+change_detection_pytorch/ufpn
+change_detection_pytorch/encoders/hrnet.py
+change_detection_pytorch/encoders/swin_transformer.py
+weights
