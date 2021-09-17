@@ -93,6 +93,7 @@ class FPNDecoder(Decoder):
 
         encoder_channels = encoder_channels[::-1]
         encoder_channels = encoder_channels[:encoder_depth + 1]
+        # (512, 256, 128, 64, 64, 3)
 
         # adjust encoder channels according to fusion form
         self.fusion_form = fusion_form
