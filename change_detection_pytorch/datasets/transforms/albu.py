@@ -26,7 +26,7 @@ try:
 except:
     from albumentations.augmentations.crops.functional import random_crop
 
-__all__ = ["ToTensorTest", "ChunkImage", "ExchangeTime", "RandomChoice"]
+__all__ = ["ToTensorTest", "ChunkImage", "ExchangeTime", "RandomChoice", "Mosaic"]
 
 
 class ToTensorTest(BasicTransform):
