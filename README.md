@@ -43,7 +43,7 @@ Please refer to local_test.py temporarily.
 
 - [x] DeepLabV3+ [[paper](https://arxiv.org/abs/1802.02611)]
 
-- [ ] UPerNet [[paper](https://arxiv.org/abs/1807.10221)]
+- [x] UPerNet [[paper](https://arxiv.org/abs/1807.10221)]
 
 #### Encoders <a name="encoders"></a>
 
