@@ -7,6 +7,7 @@ from .pspnet import PSPNet
 from .deeplabv3 import DeepLabV3, DeepLabV3Plus
 from .pan import PAN
 from .stanet import STANet
+from .upernet import UPerNet
 
 from . import encoders
 from . import utils
