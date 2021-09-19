@@ -61,11 +61,17 @@ class Epoch:
 
                 assert y is not None or not evaluate, "When the label is None, the evaluation mode cannot be turned on."
 
-                x1, x2, y = self.check_tensor(x1, False), self.check_tensor(x2, False), \
-                            self.check_tensor(y, True)
-                x1, x2, y = x1.float(), x2.float(), y.long()
-                x1, x2, y = x1.to(self.device), x2.to(self.device), y.to(self.device)
-                y_pred = self.model.forward(x1, x2)
+                if y is not None:
+                    x1, x2, y = self.check_tensor(x1, False), self.check_tensor(x2, False), \
+                                self.check_tensor(y, True)
+                    x1, x2, y = x1.float(), x2.float(), y.long()
+                    x1, x2, y = x1.to(self.device), x2.to(self.device), y.to(self.device)
+                    y_pred = self.model.forward(x1, x2)
+                else:
+                    x1, x2 = self.check_tensor(x1, False), self.check_tensor(x2, False)
+                    x1, x2 = x1.float(), x2.float()
+                    x1, x2 = x1.to(self.device), x2.to(self.device)
+                    y_pred = self.model.forward(x1, x2)
 
                 if evaluate:
                     # update metrics logs
