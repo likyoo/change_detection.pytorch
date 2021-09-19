@@ -44,7 +44,7 @@ class Epoch:
     def infer_vis(self, dataloader, save=True, evaluate=False, slide=False, image_size=1024,
                   window_size=256, save_dir='./res', suffix='.tif'):
         """
-        Infer and save results.
+        Infer and save results. (debugging)
         Note: Currently only batch_size=1 is supported.
         Weakly robust.
         'image_size' and 'window_size' work when slide is True.
