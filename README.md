@@ -15,7 +15,7 @@
 This project is inspired by **[segmentation_models.pytorch](https://github.com/qubvel/segmentation_models.pytorch)** and built based on it. 😄
 
 
-<img src="resources/model architecture.png" alt="model architecture" style="zoom:80%;" />
+<img src="resources/model architecture.png" alt="model architecture" style="zoom:60%;" />
 
 
 ### 🌱 How to use <a name="use"></a>
