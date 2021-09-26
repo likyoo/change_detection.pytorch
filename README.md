@@ -16,6 +16,10 @@ This project is inspired by **[segmentation_models.pytorch](https://github.com/q
 
 
 
+<img src="resources/model architecture.png" alt="model architecture" style="zoom:80%;" />
+
+
+
 ### 🌱 How to use <a name="use"></a>
 
 Please refer to local_test.py temporarily.
