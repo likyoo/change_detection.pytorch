@@ -126,26 +126,3 @@ def recall(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
     score = (tp + eps) / (tp + fn + eps)
 
     return score
-
-def binary_miou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
-    """Calculate binary_miou score between ground truth and prediction
-    Args:
-        pr (torch.Tensor): predicted tensor
-        gt (torch.Tensor):  ground truth tensor
-        eps (float): epsilon to avoid zero division
-        threshold: threshold for outputs binarization
-    Returns:
-        float: precision score
-    """
-
-    pr = _threshold(pr, threshold=threshold)
-    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
-
-    tp = torch.sum(gt * pr)
-    fp = torch.sum(pr) - tp
-    fn = torch.sum(gt) - tp
-    tn = torch.sum(gt == pr, dtype=pr.dtype) - tp
-
-    score = ((tp + eps) / (tp + fp + fn + eps) + (tn + eps) / (tn + fp + fn + eps)) / 2
-
-    return score
