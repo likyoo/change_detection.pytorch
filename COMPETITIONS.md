@@ -14,13 +14,7 @@ Here you can find competitions, names of the winners and links to their solution
 - 3rd place. 
 
   [Kaiyu Li](https://github.com/likyoo), 
-  
   [Fulin Sun](https://github.com/LinoSun), 
-  
   Xudong Liu, 
-  
-  Guoqiang Liu,  
-  
+  Guoqiang Liu, 
   [[description](https://github.com/likyoo/PRCV2021_ChangeDetection_Top3)]
-  
-  
