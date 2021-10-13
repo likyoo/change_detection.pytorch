@@ -316,6 +316,13 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 
 
 
+### 🏆 Competitions won with the library
+
+`change_detection.pytorch` has competitiveness and potential in the change detection competitions.
+[Here](https://github.com/likyoo/change_detection.pytorch/blob/main/COMPETITIONS.md) you can find competitions, names of the winners and links to their solutions.
+
+
+
 ### :page_with_curl: Citing <a name="citing"></a>
 
 ```
