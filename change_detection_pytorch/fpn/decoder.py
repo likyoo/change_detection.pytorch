@@ -97,7 +97,7 @@ class FPNDecoder(Decoder):
 
         # adjust encoder channels according to fusion form
         self.fusion_form = fusion_form
-        if self.fusion_form == "concat":
+        if self.fusion_form in self.FUSION_DIC["2to2_fusion"]:
             encoder_channels = [ch*2 for ch in encoder_channels]
 
         self.p5 = nn.Conv2d(encoder_channels[0], pyramid_channels, kernel_size=1)

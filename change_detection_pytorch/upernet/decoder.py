@@ -98,7 +98,7 @@ class UPerNetDecoder(Decoder):
 
         # adjust encoder channels according to fusion form
         self.fusion_form = fusion_form
-        if self.fusion_form == "concat":
+        if self.fusion_form in self.FUSION_DIC["2to2_fusion"]:
             encoder_channels = [ch*2 for ch in encoder_channels]
 
         self.psp = PSPModule(

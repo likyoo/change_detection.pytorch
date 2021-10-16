@@ -2,6 +2,11 @@ import torch
 
 
 class Decoder(torch.nn.Module):
+    # TODO: support learnable fusion modules
+    def __init__(self):
+        super().__init__()
+        self.FUSION_DIC = {"2to1_fusion": ["sum", "diff", "abs_diff"],
+                           "2to2_fusion": ["concat"]}
 
     def fusion(self, x1, x2, fusion_form="concat"):
         """Specify the form of feature fusion"""
@@ -10,6 +15,8 @@ class Decoder(torch.nn.Module):
         elif fusion_form == "sum":
             x = x1 + x2
         elif fusion_form == "diff":
+            x = x2 - x1
+        elif fusion_form == "abs_diff":
             x = torch.abs(x1 - x2)
         else:
             raise ValueError('the fusion form "{}" is not defined'.format(fusion_form))

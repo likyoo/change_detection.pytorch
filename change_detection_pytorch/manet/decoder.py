@@ -166,7 +166,7 @@ class MAnetDecoder(Decoder):
 
         # adjust encoder channels according to fusion form
         self.fusion_form = fusion_form
-        if self.fusion_form == "concat":
+        if self.fusion_form in self.FUSION_DIC["2to2_fusion"]:
             skip_channels = [ch*2 for ch in skip_channels]
             in_channels[0] = in_channels[0] * 2
             head_channels = head_channels * 2
