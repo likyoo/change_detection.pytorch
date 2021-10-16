@@ -10,8 +10,8 @@ class SegmentationModel(torch.nn.Module):
         if self.classification_head is not None:
             init.initialize_head(self.classification_head)
 
-    def forward(self, x1, x2):
-        """Sequentially pass `x` trough model`s encoder, decoder and heads"""
+    def base_forward(self, x1, x2):
+        """Sequentially pass `x1` `x2` trough model`s encoder, decoder and heads"""
         if self.siam_encoder:
             features = self.encoder(x1), self.encoder(x2)
         else:
@@ -27,11 +27,15 @@ class SegmentationModel(torch.nn.Module):
 
         return masks
 
-    def predict(self, x):
-        """Inference method. Switch model to `eval` mode, call `.forward(x)` with `torch.no_grad()`
+    def forward(self, x1, x2):
+        """Sequentially pass `x1` `x2` trough model`s encoder, decoder and heads"""
+        return self.base_forward(x1, x2)
+
+    def predict(self, x1, x2):
+        """Inference method. Switch model to `eval` mode, call `.forward(x1, x2)` with `torch.no_grad()`
 
         Args:
-            x: 4D torch tensor with shape (batch_size, channels, height, width)
+            x1, x2: 4D torch tensor with shape (batch_size, channels, height, width)
 
         Return:
             prediction: 4D torch tensor with shape (batch_size, classes, height, width)
@@ -41,6 +45,6 @@ class SegmentationModel(torch.nn.Module):
             self.eval()
 
         with torch.no_grad():
-            x = self.forward(x)
+            x = self.forward(x1, x2)
 
         return x
