@@ -20,7 +20,7 @@ class SVCD_Dataset(CustomDataset):
             A.Resize(self.size, self.size),
             # A.HorizontalFlip(p=0.5),
             # A.RandomRotate90(p=0.5),
-            A.Normalize(mean=(0, 0, 0), std=(1, 1, 1)),     # div(255)
+            A.Normalize(),
             ToTensorV2()
         ], additional_targets={'image_2': 'image'})
         return default_transform
@@ -30,7 +30,7 @@ class SVCD_Dataset(CustomDataset):
 
         test_transform = A.Compose([
             A.Resize(self.size, self.size),
-            A.Normalize(mean=(0, 0, 0), std=(1, 1, 1)),     # div(255)
+            A.Normalize(),
             ToTensorV2()
         ], additional_targets={'image_2': 'image'})
         return test_transform

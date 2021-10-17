@@ -19,7 +19,7 @@ class LEVIR_CD_Dataset(CustomDataset):
         default_transform = A.Compose([
             A.RandomCrop(self.size, self.size),
             # A.ShiftScaleRotate(),
-            A.Normalize(mean=(0, 0, 0), std=(1, 1, 1)),  # div(255)
+            A.Normalize(),
             ToTensorV2()
         ], additional_targets={'image_2': 'image'})
         return default_transform
@@ -30,7 +30,7 @@ class LEVIR_CD_Dataset(CustomDataset):
         from change_detection_pytorch.datasets.transforms.albu import (
             ChunkImage, ToTensorTest)
         test_transform = A.Compose([
-            A.Normalize(mean=(0, 0, 0), std=(1, 1, 1)),  # div(255)
+            A.Normalize(),
             ChunkImage(self.size),
             ToTensorTest(),
         ], additional_targets={'image_2': 'image'})
