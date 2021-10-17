@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from ..base import ClassificationHead, SegmentationHead, SegmentationModel, SegmentationOCRHead
+from ..base import ClassificationHead, SegmentationHead, SegmentationModel
 from ..encoders import get_encoder
 from .decoder import UPerNetDecoder
 
