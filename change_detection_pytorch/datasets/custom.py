@@ -154,7 +154,7 @@ class CustomDataset(Dataset):
 
         default_transform = A.Compose([
             A.Resize(self.size, self.size),
-            A.Normalize(mean=(0, 0, 0, 0, 0, 0), std=(1, 1, 1, 1, 1, 1)),     # div(255)
+            A.Normalize(),
             ToTensorV2()
         ])
         return default_transform
