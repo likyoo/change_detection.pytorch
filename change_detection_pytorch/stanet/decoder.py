@@ -50,8 +50,9 @@ class STANetDecoder(Decoder):
             sa_mode='PAM'
     ):
         super(STANetDecoder, self).__init__()
+        self.out_channel = f_c
         self.backbone_decoder = BackboneDecoder(f_c, nn.BatchNorm2d, encoder_out_channels)
-        self.netA = CDSA(in_c=64, ds=1, mode=sa_mode)
+        self.netA = CDSA(in_c=f_c, ds=1, mode=sa_mode)
 
     def forward(self, *features):
         # fetch feature maps
@@ -148,7 +149,6 @@ class DR(nn.Module):
         x = self.bn1(x)
         x = self.relu(x)
         return x
-
 
 # if __name__ == '__main__':
 #     from change_detection_pytorch.encoders import get_encoder

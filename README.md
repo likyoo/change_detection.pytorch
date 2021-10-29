@@ -49,6 +49,8 @@ Please refer to local_test.py temporarily.
 
 - [x] UPerNet [[paper](https://arxiv.org/abs/1807.10221)]
 
+- [x] STANet [[paper](https://www.mdpi.com/2072-4292/12/10/1662)]
+
 #### Encoders <a name="encoders"></a>
 
 The following is a list of supported encoders in the CDP. Select the appropriate family of encoders and click to expand the table and select a specific encoder and its pre-trained weights (`encoder_name` and `encoder_weights` parameters).
