@@ -27,6 +27,7 @@ class STANet(torch.nn.Module):
         https://www.mdpi.com/2072-4292/12/10/1662
 
     """
+
     def __init__(
             self,
             encoder_name: str = "resnet",
