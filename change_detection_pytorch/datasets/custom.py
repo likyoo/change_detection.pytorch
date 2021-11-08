@@ -40,6 +40,9 @@ class CustomDataset(Dataset):
         ann_dir (str): Path to ground truth directory.
         img_suffix (str): Suffix of images. Default: '.jpg'
         seg_map_suffix (str): Suffix of segmentation maps. Default: '.png'
+        split (str|None): Split txt file. If split is specified, only file
+            with suffix in the splits will be loaded. Otherwise, all images
+            in img_dir/ann_dir will be loaded. Default: None
         data_root (str, optional): Data root for img_dir/ann_dir. Default:
             None.
         test_mode (bool): Whether to the test mode.
