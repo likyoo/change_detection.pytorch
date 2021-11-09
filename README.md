@@ -1,12 +1,8 @@
-### Change Detection Models (Remote Sensing)
+<h1 align="center">
+  <b>Change Detection Models</b><br>
+</h1>
 
-**Python library with Neural Networks for Change Detection based on PyTorch.**
-
-
-
-⚡⚡⚡ I am trying to build this project, if you are interested, don't hesitate to join us! 
-
-👯👯👯 Contact me at likyoo@sdust.edu.cn or pull a request directly.
+<center><b>Python library with Neural Networks for Change Detection based on PyTorch.</b></center>
 
 
 
@@ -343,12 +339,14 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 ### :books: Reference <a name="reference"></a>
 
 - [qubvel/segmentation_models.pytorch](https://github.com/qubvel/segmentation_models.pytorch)
-
 - [albumentations-team/albumentations](https://github.com/albumentations-team/albumentations)
-
 - [open-mmlab/mmsegmentation](https://github.com/open-mmlab/mmsegmentation)
-
 - [wenhwu/awesome-remote-sensing-change-detection](https://github.com/wenhwu/awesome-remote-sensing-change-detection)
 
 
 
+### :mailbox:: Contact<a name="contact"></a>
+
+⚡⚡⚡ I am trying to build this project, if you are interested, don't hesitate to join us! 
+
+👯👯👯 Contact me at likyoo@sdust.edu.cn or pull a request directly.
