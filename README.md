@@ -340,7 +340,7 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 
 
 
-### :mailbox:: Contact<a name="contact"></a>
+### :mailbox: Contact<a name="contact"></a>
 
 ⚡⚡⚡ I am trying to build this project, if you are interested, don't hesitate to join us! 
 
