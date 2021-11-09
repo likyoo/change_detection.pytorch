@@ -1,8 +1,9 @@
 <h1 align="center">
   <b>Change Detection Models</b><br>
 </h1>
-
-<center><b>Python library with Neural Networks for Change Detection based on PyTorch.</b></center>
+<p align="center">
+      <b>Python library with Neural Networks for Change Detection based on PyTorch.</b>
+</p>
 
 
 
