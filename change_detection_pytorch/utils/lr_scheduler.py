@@ -64,6 +64,8 @@ class GradualWarmupScheduler(_LRScheduler):
         else:
             self.step_ReduceLROnPlateau(metrics, epoch)
 
+# TODO: Poly
+
 if __name__ == '__main__':
     # https://github.com/ildoonet/pytorch-gradual-warmup-lr
     import torch
