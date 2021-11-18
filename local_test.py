@@ -12,8 +12,8 @@ model = cdp.Unet(
     encoder_weights="imagenet",  # use `imagenet` pre-trained weights for encoder initialization
     in_channels=3,  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
     classes=2,  # model output channels (number of classes in your datasets)
-    siam_encoder=True,
-    fusion_form='concat',
+    siam_encoder=True,  # whether to use a siamese encoder
+    fusion_form='concat',  # the form of fusing features from two branches. e.g. concat, sum, diff, or abs_diff.
 )
 
 train_dataset = LEVIR_CD_Dataset('../LEVIR-CD/train',
@@ -86,5 +86,4 @@ for i in range(1, MAX_EPOCH + 1):
         print('Model saved!')
 
 # save results (change maps)
-valid_epoch.infer_vis(valid_loader, slide=True, image_size=1024, window_size=256,
-                      save_dir='./res')
+valid_epoch.infer_vis(valid_loader, save=True, slide=False, save_dir='./res')

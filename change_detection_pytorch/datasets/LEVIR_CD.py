@@ -2,7 +2,9 @@ import os.path as osp
 
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-from change_detection_pytorch.datasets.custom import CustomDataset
+
+from .custom import CustomDataset
+from .transforms.albu import ChunkImage, ToTensorTest
 
 
 class LEVIR_CD_Dataset(CustomDataset):
@@ -27,12 +29,9 @@ class LEVIR_CD_Dataset(CustomDataset):
     def get_test_transform(self):
         """Set the test transformation."""
 
-        from change_detection_pytorch.datasets.transforms.albu import (
-            ChunkImage, ToTensorTest)
         test_transform = A.Compose([
             A.Normalize(),
-            ChunkImage(self.size),
-            ToTensorTest(),
+            ToTensorV2()
         ], additional_targets={'image_2': 'image'})
         return test_transform
 
