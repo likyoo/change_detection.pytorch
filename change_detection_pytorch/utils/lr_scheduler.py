@@ -142,10 +142,9 @@ class PolyScheduler(_LRScheduler):
             raise TypeError('{} is not an Optimizer'.format(
                 type(optimizer).__name__))
         self.optimizer = optimizer
-        self.by_epoch = by_epoch
-        self.epochs = epochs
-        self.min_lr = min_lr
         self.power = power
+        self.by_epoch = by_epoch
+        self.min_lr = min_lr
 
         # Validate total_steps
         if by_epoch:
