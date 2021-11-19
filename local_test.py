@@ -71,7 +71,7 @@ valid_epoch = cdp.utils.train.ValidEpoch(
 max_score = 0
 MAX_EPOCH = 60
 
-for i in range(1, MAX_EPOCH + 1):
+for i in range(MAX_EPOCH):
 
     print('\nEpoch: {}'.format(i))
     train_logs = train_epoch.run(train_loader)
