@@ -1,5 +1,5 @@
 import torch.nn as nn
-from .modules import Flatten, Activation, OCR
+from .modules import Flatten, Activation
 
 
 class SegmentationHead(nn.Sequential):
@@ -9,21 +9,6 @@ class SegmentationHead(nn.Sequential):
         upsampling = nn.Upsample(scale_factor=upsampling, mode='bilinear', align_corners=align_corners) if upsampling > 1 else nn.Identity()
         activation = Activation(activation)
         super().__init__(conv2d, upsampling, activation)
-
-
-class SegmentationOCRHead(nn.Module):
-
-    def __init__(self, in_channels, out_channels, activation=None, upsampling=1, align_corners=True):
-        super().__init__()
-        self.ocr_head = OCR(in_channels, out_channels)
-        self.upsampling = nn.Upsample(scale_factor=upsampling, mode='bilinear', align_corners=align_corners) if upsampling > 1 else nn.Identity()
-        self.activation = Activation(activation)
-
-    def forward(self, x):
-        coarse_pre, pre = self.ocr_head(x)
-        coarse_pre = self.activation(self.upsampling(coarse_pre))
-        pre = self.activation(self.upsampling(pre))
-        return [coarse_pre, pre]
 
 
 class ClassificationHead(nn.Sequential):
