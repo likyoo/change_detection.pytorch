@@ -320,7 +320,7 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 
 ```
 @misc{likyoocdp:2021,
-  Author = {Kaiyu Li, Fulin Sun},
+  Author = {Kaiyu Li, Fulin Sun, Xudong Liu},
   Title = {Change Detection Pytorch},
   Year = {2021},
   Publisher = {GitHub},
