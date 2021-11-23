@@ -3,7 +3,7 @@ __pycache__/
 .idea/
 .pytest_cache
 changelog.md
-test_tt.py
+liky_train.py
 change_detection_pytorch/datasets/PRCV_CD.py
 tools
 change_detection_pytorch/V2

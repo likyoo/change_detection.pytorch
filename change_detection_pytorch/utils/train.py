@@ -39,7 +39,7 @@ class Epoch:
     def check_tensor(self, data, is_label):
         if not is_label:
             return data if data.ndim <= 4 else data.squeeze()
-        return data if data.ndim <= 3 else data.squeeze()
+        return data.long() if data.ndim <= 3 else data.squeeze().long()
 
     def infer_vis(self, dataloader, save=True, evaluate=False, slide=False, image_size=1024,
                   window_size=256, save_dir='./res', suffix='.tif'):
@@ -64,7 +64,6 @@ class Epoch:
                 if y is not None:
                     x1, x2, y = self.check_tensor(x1, False), self.check_tensor(x2, False), \
                                 self.check_tensor(y, True)
-                    x1, x2, y = x1.float(), x2.float(), y.long()
                     x1, x2, y = x1.to(self.device), x2.to(self.device), y.to(self.device)
                     y_pred = self.model.forward(x1, x2)
                 else:
@@ -116,7 +115,6 @@ class Epoch:
 
                 x1, x2, y = self.check_tensor(x1, False), self.check_tensor(x2, False), \
                             self.check_tensor(y, True)
-                x1, x2, y = x1.float(), x2.float(), y.long()
                 x1, x2, y = x1.to(self.device), x2.to(self.device), y.to(self.device)
                 loss, y_pred = self.batch_update(x1, x2, y)
 
