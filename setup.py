@@ -15,7 +15,7 @@ from setuptools import find_packages, setup, Command
 NAME = 'change_detection_pytorch'
 DESCRIPTION = 'Change detection models with pre-trained backbones. Inspired by segmentation_models.pytorch.'
 URL = 'https://github.com/likyoo/change_detection.pytorch'
-EMAIL = 'likyoo@sdust.edu.cn;linoemail@163.com'
+EMAIL = 'likyoo@sdust.edu.cn,linoemail@163.com'
 AUTHOR = 'Kaiyu Li, Fulin Sun, Xudong Liu'
 REQUIRES_PYTHON = '>=3.0.0'
 VERSION = None
