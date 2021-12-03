@@ -6,7 +6,7 @@
 </p>
 
 
-<img src="resources/model architecture.png" alt="model architecture" style="zoom:80%;" />
+<img src="https://raw.githubusercontent.com/likyoo/change_detection.pytorch/main/resources/model%20architecture.png" alt="model architecture" style="zoom:80%;" />
 
 
 This project is inspired by **[segmentation_models.pytorch](https://github.com/qubvel/segmentation_models.pytorch)** and built based on it. 😄
