@@ -344,4 +344,6 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 
 ⚡⚡⚡ I am trying to build this project, if you are interested, don't hesitate to join us! 
 
-👯👯👯 Contact me at likyoo@sdust.edu.cn or pull a request directly.
+👯👯👯 Contact me at likyoo@sdust.edu.cn or pull a request directly or join our WeChat group.
+
+<img src="resources/wechat.jpg" alt="model architecture" style="zoom:80%;" />
