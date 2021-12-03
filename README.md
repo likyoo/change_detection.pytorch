@@ -345,4 +345,4 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 ⚡⚡⚡ I am trying to build this project, if you are interested, don't hesitate to join us! 
 
 👯👯👯 Contact me at likyoo@sdust.edu.cn or pull a request directly or join our WeChat group.
-<div align=center><img src="resources/wechat.jpg" alt="wechat group" width="256" height="256"  style="zoom:80%;" /></div>
+<div align=center><img src="resources/wechat.jpg" alt="wechat group" width="38%" height="38%"  style="zoom:80%;" /></div>
