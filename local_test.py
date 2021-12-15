@@ -86,4 +86,16 @@ for i in range(MAX_EPOCH):
         print('Model saved!')
 
 # save results (change maps)
+"""
+Note: if you use sliding window inference, set: 
+    from change_detection_pytorch.datasets.transforms.albu import (
+        ChunkImage, ToTensorTest)
+    
+    test_transform = A.Compose([
+        A.Normalize(),
+        ChunkImage({window_size}}),
+        ToTensorTest(),
+    ], additional_targets={'image_2': 'image'})
+
+"""
 valid_epoch.infer_vis(valid_loader, save=True, slide=False, save_dir='./res')
