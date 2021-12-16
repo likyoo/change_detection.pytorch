@@ -67,6 +67,7 @@ class UnetPlusPlus(SegmentationModel):
         siam_encoder: bool = True,
         fusion_form: str = "diff",
         seg_ensemble: Optional[str] = None,
+        **kwargs
     ):
         super().__init__()
 

@@ -36,7 +36,8 @@ class STANet(torch.nn.Module):
             in_channels: int = 3,
             classes=2,
             activation=None,
-            return_distance_map=False
+            return_distance_map=False,
+            **kwargs
     ):
         super(STANet, self).__init__()
         self.return_distance_map = return_distance_map

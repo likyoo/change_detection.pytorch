@@ -57,6 +57,7 @@ class DeepLabV3(SegmentationModel):
             aux_params: Optional[dict] = None,
             siam_encoder: bool = True,
             fusion_form: str = "concat",
+            **kwargs
     ):
         super().__init__()
 
