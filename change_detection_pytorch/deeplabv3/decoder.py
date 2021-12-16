@@ -39,24 +39,28 @@ from ..base import Decoder
 __all__ = ["DeepLabV3Decoder"]
 
 
-class DeepLabV3Decoder(nn.Sequential, Decoder):
+class DeepLabV3Decoder(Decoder):
     def __init__(self, in_channels, out_channels=256, atrous_rates=(12, 24, 36), fusion_form="concat"):
+        super().__init__()
+
         # adjust encoder channels according to fusion form
         if fusion_form in self.FUSION_DIC["2to2_fusion"]:
             in_channels = in_channels * 2
 
-        super().__init__(
+        self.aspp = nn.Sequential(
             ASPP(in_channels, out_channels, atrous_rates),
             nn.Conv2d(out_channels, out_channels, 3, padding=1, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(),
         )
+
         self.out_channels = out_channels
         self.fusion_form = fusion_form
 
     def forward(self, *features):
         x = self.fusion(features[0][-1], features[1][-1], self.fusion_form)
-        return super().forward(x)
+        x = self.aspp(x)
+        return x
 
 
 class DeepLabV3PlusDecoder(Decoder):
