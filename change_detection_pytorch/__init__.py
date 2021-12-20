@@ -12,6 +12,7 @@ from .upernet import UPerNet
 from . import encoders
 from . import utils
 from . import losses
+from . import datasets
 
 from .__version__ import __version__
 
