@@ -15,7 +15,7 @@ from setuptools import find_packages, setup, Command
 NAME = 'change_detection_pytorch'
 DESCRIPTION = 'Change detection models with pre-trained backbones. Inspired by segmentation_models.pytorch.'
 URL = 'https://github.com/likyoo/change_detection.pytorch'
-EMAIL = 'likyoo@sdust.edu.cn,linoemail@163.com'
+EMAIL = 'likyoo@sdust.edu.cn'
 AUTHOR = 'Kaiyu Li, Fulin Sun, Xudong Liu'
 REQUIRES_PYTHON = '>=3.0.0'
 VERSION = None
@@ -32,7 +32,13 @@ try:
     with open(os.path.join(here, 'requirements.txt'), encoding='utf-8') as f:
         REQUIRED = f.read().split('\n')
 except:
-    REQUIRED = []
+    REQUIRED = [
+        "torchvision>=0.5.0",
+        "pretrainedmodels==0.7.4",
+        "efficientnet-pytorch==0.6.3",
+        "timm==0.4.12",
+        "albumentations",
+    ]
 
 # What packages are optional?
 EXTRAS = {
