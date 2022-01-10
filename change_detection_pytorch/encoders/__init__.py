@@ -23,6 +23,7 @@ from .timm_universal import TimmUniversalEncoder
 from .vgg import vgg_encoders
 from .xception import xception_encoders
 from .swin_transformer import swin_transformer_encoders
+from .mit_encoder import mit_encoders
 # from .hrnet import hrnet_encoders
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -46,6 +47,7 @@ encoders.update(timm_sknet_encoders)
 encoders.update(timm_mobilenetv3_encoders)
 encoders.update(timm_gernet_encoders)
 encoders.update(swin_transformer_encoders)
+encoders.update(mit_encoders)
 # encoders.update(hrnet_encoders)
 
 
