@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from copy import deepcopy
+from collections import OrderedDict
 from pretrainedmodels.models.torchvision_models import pretrained_settings
 
 from ._base import EncoderMixin
@@ -50,46 +51,54 @@ class SwinTransformerEncoder(SwinTransformer, EncoderMixin):
             x = stage(x)
             features.append(x)
         outs = self.feature_forward(x)
+
+        # Note: An additional interpolated feature to accommodate five-stage decoders,\
+        # the additional feature will be ignored if a decoder with fewer stages is used.
         add_feature = F.interpolate(outs[0], scale_factor=2)
         features = features + [add_feature] + outs
         return features
 
     def load_state_dict(self, state_dict, **kwargs):
 
-        new_state_dict = {}
-        if state_dict.get('model'):
-            state_dict = state_dict['model']
+        new_state_dict = OrderedDict()
 
-            state_dict.pop("head.bias", None)
-            state_dict.pop("head.weight", None)
-
-        if state_dict.get('state_dict'):
-            state_dict = state_dict['state_dict']
-            for k, v in state_dict.items():
-                if k.startswith('backbone'):
-                    new_state_dict[k.replace('backbone.', '')] = v
+        if 'state_dict' in state_dict:
+            _state_dict = state_dict['state_dict']
+        elif 'model' in state_dict:
+            _state_dict = state_dict['model']
         else:
-            new_state_dict = deepcopy(state_dict)
+            _state_dict = state_dict
+
+        for k, v in _state_dict.items():
+            if k.startswith('backbone.'):
+                new_state_dict[k[9:]] = v
+            else:
+                new_state_dict[k] = v
+
+        # Note: In swin seg model: `attn_mask` is no longer a class attribute for
+        # multi-scale inputs; a norm layer is added for each output; the head layer
+        # is removed.
+        kwargs.update({'strict': False})
         super().load_state_dict(new_state_dict, **kwargs)
 
 
 # https://github.com/microsoft/Swin-Transformer
 new_settings = {
     "Swin-T": {
-        # "ImageNet-1k": "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth",
+        "imagenet": "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth",
         "ADE20k": "https://github.com/SwinTransformer/storage/releases/download/v1.0.1/upernet_swin_tiny_patch4_window7_512x512.pth"
     },
     "Swin-S": {
-        # "ImageNet-1k": "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth",
+        "imagenet": "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth",
         "ADE20k": "https://github.com/SwinTransformer/storage/releases/download/v1.0.1/upernet_swin_small_patch4_window7_512x512.pth"
     },
     "Swin-B": {
-        # "ImageNet-1k": "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window7_224.pth",
-        # "ImageNet-22k": "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window7_224_22k.pth",
+        "imagenet": "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window7_224.pth",
+        "imagenet-22k": "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window7_224_22k.pth",
         "ADE20k": "https://github.com/SwinTransformer/storage/releases/download/v1.0.1/upernet_swin_base_patch4_window7_512x512.pth"
     },
     "Swin-L": {
-        "ImageNet-22k": "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_large_patch4_window7_224_22k.pth"
+        "imagenet-22k": "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_large_patch4_window7_224_22k.pth"
     },
 
 }
@@ -175,13 +184,12 @@ swin_transformer_encoders = {
 
 if __name__ == "__main__":
     import torch
-    import yaml
-    pretrained = False
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     input = torch.randn(1, 3, 256, 256).to(device)
 
     model = SwinTransformerEncoder(2, window_size=8)
+    # print(model)
 
     res = model.forward(input)
     for i in res:

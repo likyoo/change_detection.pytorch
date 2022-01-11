@@ -551,6 +551,7 @@ class SwinTransformer(nn.Module):
             layer_name = f'norm{i_layer}'
             self.add_module(layer_name, layer)
 
+        self.init_weights()  # the pre-trained model will be loaded later if needed
         self._freeze_stages()
 
     def _freeze_stages(self):
