@@ -99,4 +99,40 @@ class Precision(base.Metric):
         )
 
 
+class Dice(base.Metric):
+
+    def __init__(self,  eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
+        super().__init__(**kwargs)
+        self.eps = eps
+        self.threshold = threshold
+        self.activation = Activation(activation)
+        self.ignore_channels = ignore_channels
+
+    def forward(self, y_pr, y_gt):
+        y_pr = self.activation(y_pr)
+        return F.dice(
+            y_pr, y_gt,
+            eps=self.eps,
+            threshold=self.threshold,
+            ignore_channels=self.ignore_channels,
+        )
+
+
+class Kappa(base.Metric):
+
+    def __init__(self,  eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
+        super().__init__(**kwargs)
+        self.eps = eps
+        self.threshold = threshold
+        self.activation = Activation(activation)
+        self.ignore_channels = ignore_channels
+
+    def forward(self, y_pr, y_gt):
+        y_pr = self.activation(y_pr)
+        return F.kappa(
+            y_pr, y_gt,
+            eps=self.eps,
+            threshold=self.threshold,
+            ignore_channels=self.ignore_channels,
+        )
 
