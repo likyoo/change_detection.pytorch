@@ -126,3 +126,56 @@ def recall(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
     score = (tp + eps) / (tp + fn + eps)
 
     return score
+
+
+def kappa(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
+    """Calculate kappa score between ground truth and prediction
+    Args:
+        pr (torch.Tensor): A list of predicted elements
+        gt (torch.Tensor):  A list of elements that are to be predicted
+        eps (float): epsilon to avoid zero division
+        threshold: threshold for outputs binarization
+    Returns:
+        float: kappa score
+    """
+
+    pr = _threshold(pr, threshold=threshold)
+    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
+
+    tp = torch.sum(gt * pr)
+    fp = torch.sum(pr) - tp
+    fn = torch.sum(gt) - tp
+    tn = torch.sum((1 - gt)*(1 - pr))
+
+    N = tp + tn + fp + fn
+    p0 = (tp + tn) / N
+    pe = ((tp + fp) * (tp + fn) + (tn + fp) * (tn + fn)) / (N * N)
+
+    score = (p0 - pe) / (1 - pe)
+
+    return score
+
+
+def dice(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
+    """Calculate dice score between ground truth and prediction
+    Args:
+        pr (torch.Tensor): A list of predicted elements
+        gt (torch.Tensor):  A list of elements that are to be predicted
+        eps (float): epsilon to avoid zero division
+        threshold: threshold for outputs binarization
+    Returns:
+        float: dice score
+    """
+    pr = _threshold(pr, threshold=threshold)
+    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
+
+    tp = torch.sum(gt * pr)
+    fp = torch.sum(pr) - tp
+    fn = torch.sum(gt) - tp
+
+    _precision = precision(pr, gt, eps=eps, threshold=threshold, ignore_channels=ignore_channels)
+    _recall = recall(pr, gt, eps=eps, threshold=threshold, ignore_channels=ignore_channels)
+
+    score = 2 * _precision * _recall / (_precision + _recall)
+
+    return score
