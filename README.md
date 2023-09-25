@@ -346,3 +346,5 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 
 👯👯👯 Contact me at likyoo@sdust.edu.cn or pull a request directly or join our WeChat group.
 <div align=center><img src="resources/wechat.jpg" alt="wechat group" width="38%" height="38%"  style="zoom:80%;" /></div>
+
+若二维码已失效，可以添加微信likyoo7，添加时请备注姓名/昵称 + 单位/学校 + 变化检测
