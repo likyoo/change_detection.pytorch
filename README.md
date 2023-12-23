@@ -318,6 +318,27 @@ The following is a list of supported encoders in the CDP. Select the appropriate
 
 ### :page_with_curl: Citing <a name="citing"></a>
 
+If you find this project useful in your research, please consider cite:
+
+```bibtex
+@article{li2023new,
+      title={A New Learning Paradigm for Foundation Model-based Remote Sensing Change Detection}, 
+      author={Li, Kaiyu and Cao, Xiangyong and Meng, Deyu},
+      journal={arXiv preprint arXiv:2312.01163},
+      year={2023}
+}
+
+@ARTICLE{10129139,
+  author={Fang, Sheng and Li, Kaiyu and Li, Zhe},
+  journal={IEEE Transactions on Geoscience and Remote Sensing}, 
+  title={Changer: Feature Interaction is What You Need for Change Detection}, 
+  year={2023},
+  volume={61},
+  number={},
+  pages={1-11},
+  doi={10.1109/TGRS.2023.3277496}}
+```
+
 ```
 @misc{likyoocdp:2021,
   Author = {Kaiyu Li, Fulin Sun, Xudong Liu},
